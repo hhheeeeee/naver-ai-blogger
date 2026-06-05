@@ -90,6 +90,31 @@ const runBlog = async (opts) => {
     throw new Error(`업로드할 이미지 파일을 찾지 못했습니다: ${imageInput}`);
   }
 
+  const content = readContent(opts) || buildRestaurantHtml({
+    blogName,
+    restaurantAddress,
+    notes: opts.notes,
+  });
+  const title = opts.title || `${blogName} 방문 후기`;
+  const tags = parseList(opts.tags).join(',');
+
+  if (opts.dryRun) {
+    writeJson({
+      provider: 'naver',
+      mode: 'blog',
+      status: 'dry_run',
+      title,
+      blogName,
+      restaurantAddress,
+      imageCount: imagePaths.length,
+      imagePaths,
+      tags,
+      private: Boolean(opts.private),
+      content,
+    });
+    return;
+  }
+
   await client.initBlog();
   const categoryNo = opts.category || await client.getDefaultCategoryNo();
   const token = await client.getToken(categoryNo);
@@ -97,18 +122,12 @@ const runBlog = async (opts) => {
   if (uploadedImages.components.length === 0) {
     throw new Error(`네이버에 업로드된 이미지가 없습니다: ${uploadedImages.errors.map((item) => item.error).join(', ')}`);
   }
-  const content = readContent(opts) || buildRestaurantHtml({
-    blogName,
-    restaurantAddress,
-    notes: opts.notes,
-  });
   const components = await htmlToComponents(client, content, uploadedImages.components);
-  const title = opts.title || `${blogName} 방문 후기`;
   const result = await client.publishPost({
     title,
     content: components,
     categoryNo,
-    tags: parseList(opts.tags).join(','),
+    tags,
     openType: opts.private ? 0 : 2,
   });
 
@@ -166,6 +185,7 @@ const runCli = async (argv = process.argv) => {
     .option('--tags <tags>', 'Comma-separated tags')
     .option('--category <id>', 'Naver Blog category id')
     .option('--private', 'Publish as private', false)
+    .option('--dry-run', 'Validate inputs and print the publish payload without calling Naver', false)
     .option('--session <path>', 'Path to the Naver cookie session JSON file');
   blog.action(runBlog);
 
