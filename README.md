@@ -89,6 +89,19 @@ npx naver-ai-blogger blog \
 
 `--content-file`을 넘기지 않으면 CLI가 짧은 기본 후기 HTML을 사용합니다. Codex가 사진과 사용자 메모를 바탕으로 글을 쓰는 흐름에서는 `work/naver-blog-post.html` 같은 HTML 파일을 먼저 만든 뒤 `--content-file`로 넘기는 방식을 권장합니다.
 
+Codex가 글을 쓰기 전에 입력값과 사진 목록을 정리한 초안 프롬프트 파일을 만들 수도 있습니다.
+
+```bash
+npx naver-ai-blogger draft-prompt \
+  --blog-name "식당 이름" \
+  --restaurant-address "서울시 ..." \
+  --images "./photos/*.jpg" \
+  --notes "대표 메뉴, 가격, 주차, 분위기 메모" \
+  --output work/naver-blog-draft-prompt.md
+```
+
+그다음 Codex에게 `work/naver-blog-draft-prompt.md`를 읽고 `work/naver-blog-post.html`을 만들라고 요청한 뒤, 아래 발행 명령에 `--content-file work/naver-blog-post.html`을 넘기면 됩니다.
+
 네이버 API 호출 없이 입력과 발행 payload만 확인하려면 `--dry-run`을 붙입니다.
 
 ```bash

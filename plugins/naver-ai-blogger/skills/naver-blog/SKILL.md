@@ -36,9 +36,21 @@ If required values are missing, ask for only the missing values. For photos, acc
 3. Write polished Korean HTML content for a Naver Blog restaurant review using the selected prompt.
 4. Keep the tone natural, specific, and useful. Avoid claiming facts that are not visible in the photos or provided by the user.
 5. Save the generated HTML under `work/naver-blog-post.html`. Prefer passing this file with `--content-file`; the CLI fallback is intentionally short and generic.
-6. Prefer the local repo CLI when the current workspace is this repository. Otherwise use the GitHub package spec.
-7. If the user wants a preview or the session is not ready, run the publish command with `--dry-run` first. This validates image paths and prints the payload without calling Naver.
-8. Publish with one of these commands.
+6. If the inputs need to be normalized first, create a draft prompt file with `naver-ai-blogger draft-prompt`; then read that file and write the final HTML.
+7. Prefer the local repo CLI when the current workspace is this repository. Otherwise use the GitHub package spec.
+8. If the user wants a preview or the session is not ready, run the publish command with `--dry-run` first. This validates image paths and prints the payload without calling Naver.
+9. Publish with one of these commands.
+
+Draft prompt helper:
+
+```bash
+npx naver-ai-blogger draft-prompt \
+  --blog-name "<restaurant name>" \
+  --restaurant-address "<address>" \
+  --images "<comma-separated image paths>" \
+  --notes "<user notes>" \
+  --output work/naver-blog-draft-prompt.md
+```
 
 Local repo checkout:
 
@@ -62,7 +74,7 @@ npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
   --tags "<comma-separated tags>"
 ```
 
-9. If the session is missing or expired, use the `naver` skill to login first, then retry publishing.
+10. If the session is missing or expired, use the `naver` skill to login first, then retry publishing.
 
 ## Remote Codex Notes
 

@@ -145,6 +145,83 @@ test('init-prompt creates a customizable prompt file and protects it', () => {
   assert.equal(forceResult.status, 0);
 });
 
+test('draft-prompt creates a Codex-ready prompt from restaurant inputs', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-draft-'));
+  const imageDir = path.join(tempDir, 'photos');
+  const outputPath = path.join(tempDir, 'draft.md');
+  const contentPath = path.join(tempDir, 'post.html');
+  fs.mkdirSync(imageDir);
+  ['02-menu.jpg', '01-outside.jpg'].forEach((fileName) => {
+    fs.writeFileSync(path.join(imageDir, fileName), 'fake image bytes');
+  });
+
+  const result = run([
+    'bin/naver-ai-blogger.js',
+    'draft-prompt',
+    '--blog-name',
+    '테스트 식당',
+    '--restaurant-address',
+    '서울시 테스트구',
+    '--images',
+    path.join(imageDir, '*.jpg'),
+    '--notes',
+    '대표 메뉴는 파스타',
+    '--tags',
+    '맛집,후기',
+    '--content-file',
+    contentPath,
+    '--output',
+    outputPath,
+  ]);
+
+  assert.equal(result.status, 0);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.status, 'created');
+  assert.equal(payload.outputPath, outputPath);
+  assert.equal(payload.contentFile, contentPath);
+  assert.equal(payload.imageCount, 2);
+  assert.deepEqual(payload.imagePaths.map((imagePath) => path.basename(imagePath)), [
+    '01-outside.jpg',
+    '02-menu.jpg',
+  ]);
+
+  const draft = fs.readFileSync(outputPath, 'utf8');
+  assert.match(draft, /Naver Blog Draft Task/);
+  assert.match(draft, /테스트 식당/);
+  assert.match(draft, /대표 메뉴는 파스타/);
+  assert.match(draft, /\[외관 사진\]/);
+  assert.match(draft, new RegExp(contentPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+});
+
+test('draft-prompt uses a custom prompt file when present', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-draft-'));
+  const imagePath = path.join(tempDir, 'photo.jpg');
+  const promptPath = path.join(tempDir, 'prompt.md');
+  const outputPath = path.join(tempDir, 'draft.md');
+  fs.writeFileSync(imagePath, 'fake image bytes');
+  fs.writeFileSync(promptPath, '커스텀 맛집 프롬프트');
+
+  const result = run([
+    'bin/naver-ai-blogger.js',
+    'draft-prompt',
+    '--blog-name',
+    '테스트 식당',
+    '--restaurant-address',
+    '서울',
+    '--images',
+    imagePath,
+    '--prompt-file',
+    promptPath,
+    '--output',
+    outputPath,
+  ]);
+
+  assert.equal(result.status, 0);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.promptSource, promptPath);
+  assert.match(fs.readFileSync(outputPath, 'utf8'), /커스텀 맛집 프롬프트/);
+});
+
 test('export-session emits a base64 remote secret from a saved session file', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-session-'));
   const sessionPath = path.join(tempDir, 'naver-session.json');

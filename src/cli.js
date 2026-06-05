@@ -23,6 +23,60 @@ const readContent = (opts) => {
   return opts.content || '';
 };
 
+const defaultPromptPath = () => path.resolve(__dirname, '..', 'prompts', 'restaurant-review.md');
+
+const readWritingPrompt = (opts = {}) => {
+  const promptPath = path.resolve(opts.promptFile || 'work/naver-blog-prompt.md');
+  const source = fs.existsSync(promptPath) ? promptPath : defaultPromptPath();
+  return {
+    source,
+    prompt: fs.readFileSync(source, 'utf8'),
+  };
+};
+
+const buildDraftPrompt = ({
+  blogName,
+  restaurantAddress,
+  imagePaths,
+  notes,
+  title,
+  tags,
+  contentFile,
+  prompt,
+}) => [
+  '# Naver Blog Draft Task',
+  '',
+  prompt.trim(),
+  '',
+  '## 이번 포스팅 입력값',
+  '',
+  `- 식당명: ${blogName}`,
+  `- 지역/주소: ${restaurantAddress}`,
+  `- 사진 수: ${imagePaths.length}`,
+  '- 사진 파일:',
+  ...imagePaths.map((imagePath, index) => `  ${index + 1}. ${imagePath}`),
+  `- 사용자 메모: ${notes || '제공 없음'}`,
+  `- 희망 제목: ${title || 'Codex가 제목 후보 10개 중 최종 제목 1개를 선택'}`,
+  `- 희망 태그: ${tags || '본문 마지막 해시태그 25개를 참고해 자연스럽게 구성'}`,
+  '',
+  '## Codex 작업',
+  '',
+  `1. 위 입력값과 사진 파일명을 참고해 최종 발행용 HTML 본문을 작성한다.`,
+  `2. 사진 위치는 <p>[외관 사진]</p>처럼 독립 문단으로 두고, 업로드 사진 순서와 자연스럽게 맞춘다.`,
+  `3. 최종 HTML만 ${contentFile} 파일에 저장한다.`,
+  `4. 사용자에게 제목 후보 10개, 최종 제목 1개, 추천 태그를 별도로 알려준다.`,
+  `5. 확인 후 아래 publish 명령을 실행할 수 있게 준비한다.`,
+  '',
+  '```bash',
+  `npx naver-ai-blogger blog \\`,
+  `  --blog-name "${blogName}" \\`,
+  `  --restaurant-address "${restaurantAddress}" \\`,
+  `  --images "${imagePaths.join(',')}" \\`,
+  `  --content-file ${contentFile}${title ? ` \\\n  --title "${title}"` : ''}${tags ? ` \\\n  --tags "${tags}"` : ''}`,
+  '```',
+  '',
+].join('\n');
+
 const buildRestaurantHtml = ({ blogName, restaurantAddress, notes }) => {
   const lines = [
     `<h2>${blogName}</h2>`,
@@ -41,7 +95,7 @@ const buildRestaurantHtml = ({ blogName, restaurantAddress, notes }) => {
 
 const runInitPrompt = async (opts) => {
   const target = path.resolve(opts.output || 'work/naver-blog-prompt.md');
-  const source = path.resolve(__dirname, '..', 'prompts', 'restaurant-review.md');
+  const source = defaultPromptPath();
   if (fs.existsSync(target) && !opts.force) {
     throw new Error(`프롬프트 파일이 이미 있습니다. 덮어쓰려면 --force를 사용하세요: ${target}`);
   }
@@ -51,6 +105,50 @@ const runInitPrompt = async (opts) => {
     status: 'created',
     promptPath: target,
     source,
+  });
+};
+
+const runDraftPrompt = async (opts) => {
+  const blogName = opts.blogName ||
+    await promptValue('식당 이름');
+  const restaurantAddress = opts.restaurantAddress || opts.address ||
+    await promptValue('식당 주소');
+  const imageInput = opts.images || opts.image ||
+    await promptValue('사진 경로 또는 glob');
+  requireValue(blogName, 'blog-name');
+  requireValue(restaurantAddress, 'restaurant-address');
+  requireValue(imageInput, 'images');
+
+  const imagePaths = resolveImageInputs(imageInput);
+  if (imagePaths.length === 0) {
+    throw new Error(`초안에 사용할 이미지 파일을 찾지 못했습니다: ${imageInput}`);
+  }
+
+  const outputPath = path.resolve(opts.output || 'work/naver-blog-draft-prompt.md');
+  const contentFile = opts.contentFile || 'work/naver-blog-post.html';
+  const { source, prompt } = readWritingPrompt(opts);
+  const draft = buildDraftPrompt({
+    blogName,
+    restaurantAddress,
+    imagePaths,
+    notes: opts.notes,
+    title: opts.title,
+    tags: opts.tags,
+    contentFile,
+    prompt,
+  });
+
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(outputPath, draft);
+  writeJson({
+    status: 'created',
+    outputPath,
+    contentFile,
+    promptSource: source,
+    blogName,
+    restaurantAddress,
+    imageCount: imagePaths.length,
+    imagePaths,
   });
 };
 
@@ -243,6 +341,21 @@ const runCli = async (argv = process.argv) => {
     .option('--output <path>', 'Prompt file path to create', 'work/naver-blog-prompt.md')
     .option('--force', 'Overwrite an existing prompt file', false);
   initPrompt.action(runInitPrompt);
+
+  const draftPrompt = program.command('draft-prompt')
+    .description('Create a Codex-ready prompt file for drafting a Naver Blog post.')
+    .option('--blog-name <name>', 'Restaurant or post subject name')
+    .addOption(new Option('--restaurant-address <address>', 'Restaurant address').conflicts('address'))
+    .option('--address <address>', 'Alias for --restaurant-address')
+    .option('--images <paths>', 'Comma-separated local image paths or glob patterns')
+    .option('--image <paths>', 'Alias for --images')
+    .option('--title <title>', 'Preferred final post title')
+    .option('--tags <tags>', 'Preferred comma-separated tags')
+    .option('--notes <text>', 'Additional notes to feed into the draft prompt')
+    .option('--prompt-file <path>', 'Custom writing prompt file', 'work/naver-blog-prompt.md')
+    .option('--content-file <path>', 'Target HTML content file for Codex to create', 'work/naver-blog-post.html')
+    .option('--output <path>', 'Draft prompt file to create', 'work/naver-blog-draft-prompt.md');
+  draftPrompt.action(runDraftPrompt);
 
   const exportSession = program.command('export-session')
     .description('Export the saved Naver session for remote Codex secrets.')
