@@ -235,6 +235,10 @@ node bin/naver-ai-blogger.js --help
 
 `skills/`, `prompts/`, `.codex-plugin/`을 수정했다면 `npm run sync:plugin`으로 `plugins/naver-ai-blogger/` marketplace wrapper를 갱신하세요. `npm run validate:plugin`은 root copy와 wrapper copy가 어긋나면 실패합니다.
 
+## 지원 요청
+
+이슈를 열 때는 비밀번호, 쿠키 값, `NAVER_SESSION_JSON`, `NAVER_SESSION_BASE64`를 포함하지 마세요. 발행 문제는 먼저 `doctor` 출력에서 민감정보를 제거한 뒤 공유해 주세요.
+
 실제 계정으로 smoke test를 할 때는 먼저 세션을 준비한 뒤 기본 dry-run을 실행하세요.
 
 ```bash
