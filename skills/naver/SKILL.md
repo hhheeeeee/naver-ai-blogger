@@ -34,6 +34,8 @@ npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver --userid "<i
 npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver --userid "<id>" --userpw "<password>" --manual
 ```
 
+`--manual` can also run without `--userid` / `--userpw`; the user completes login, captcha, or 2FA in the browser. Do not try to bypass captcha or anti-abuse checks with randomized delays or stealth input. Pause for user completion and persist the resulting session instead.
+
 6. Verify the saved session:
 
 ```bash

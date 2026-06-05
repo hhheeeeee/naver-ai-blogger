@@ -59,6 +59,8 @@ npx naver-ai-blogger login
 npx naver-ai-blogger login --manual
 ```
 
+`--manual`은 아이디/비밀번호 인자를 요구하지 않습니다. 열린 브라우저에서 직접 로그인과 캡차/2FA를 완료하면 쿠키 세션만 저장합니다. 캡차를 우회하기 위한 랜덤 딜레이나 스텔스 입력은 지원하지 않습니다.
+
 세션 확인:
 
 ```bash

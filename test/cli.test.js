@@ -23,6 +23,12 @@ test('naver login reports missing userid before browser launch', () => {
   assert.match(result.stderr, /필수값이 없습니다: --userid/);
 });
 
+test('naver manual login does not require userid before browser launch', () => {
+  const result = run(['bin/naver.js', '--manual', '--help']);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /--manual/);
+});
+
 test('naver-blog requires images', () => {
   const result = run([
     'bin/naver-blog.js',

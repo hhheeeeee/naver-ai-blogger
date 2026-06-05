@@ -26,6 +26,19 @@ const typeByScript = async (page, selector, value) => {
   }, { selector, value });
 };
 
+const gotoLoginPage = async (page) => {
+  try {
+    await page.goto(LOGIN_URL, { waitUntil: 'domcontentloaded' });
+  } catch (error) {
+    const message = String(error?.message || '');
+    if (!message.includes('ERR_ABORTED') && !message.includes('frame was detached')) {
+      throw error;
+    }
+    await delay(1000);
+    await page.goto(LOGIN_URL, { waitUntil: 'load', timeout: 60000 });
+  }
+};
+
 const loginNaver = async ({ username, password, sessionPath, headless = false, manual = false }) => {
   const browser = await chromium.launch({ headless });
   const context = await browser.newContext({
@@ -35,7 +48,7 @@ const loginNaver = async ({ username, password, sessionPath, headless = false, m
   const page = await context.newPage();
 
   try {
-    await page.goto(LOGIN_URL, { waitUntil: 'domcontentloaded' });
+    await gotoLoginPage(page);
     await delay(700);
 
     if (manual) {

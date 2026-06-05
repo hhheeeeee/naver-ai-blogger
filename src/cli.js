@@ -40,12 +40,14 @@ const buildRestaurantHtml = ({ blogName, restaurantAddress, notes }) => {
 
 const runLogin = async (opts) => {
   const credentials = getCredentials(opts);
-  const username = credentials.username ||
+  const username = opts.manual ? credentials.username : credentials.username ||
     await promptValue('네이버 아이디');
-  const password = credentials.password ||
+  const password = opts.manual ? credentials.password : credentials.password ||
     await promptValue('네이버 비밀번호', { secret: true });
-  requireValue(username, 'userid', 'NAVER_USERID 또는 NAVER_USERNAME');
-  requireValue(password, 'userpw', 'NAVER_USERPW 또는 NAVER_PASSWORD');
+  if (!opts.manual) {
+    requireValue(username, 'userid', 'NAVER_USERID 또는 NAVER_USERNAME');
+    requireValue(password, 'userpw', 'NAVER_USERPW 또는 NAVER_PASSWORD');
+  }
   const sessionPath = createDefaultSessionPath(opts.session);
 
   const result = await loginNaver({
