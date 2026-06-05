@@ -87,6 +87,32 @@ test('naver-blog dry-run validates local images and prints payload', () => {
   assert.match(payload.content, /테스트 후기/);
 });
 
+test('naver-blog dry-run keeps glob images in natural filename order', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-order-'));
+  ['10-menu.jpg', '02-inside.jpg', '01-outside.jpg'].forEach((fileName) => {
+    fs.writeFileSync(path.join(tempDir, fileName), 'fake image bytes');
+  });
+
+  const result = run([
+    'bin/naver-blog.js',
+    '--blog-name',
+    '테스트 식당',
+    '--restaurant-address',
+    '서울',
+    '--images',
+    path.join(tempDir, '*.jpg'),
+    '--dry-run',
+  ]);
+
+  assert.equal(result.status, 0);
+  const payload = JSON.parse(result.stdout);
+  assert.deepEqual(payload.imagePaths.map((imagePath) => path.basename(imagePath)), [
+    '01-outside.jpg',
+    '02-inside.jpg',
+    '10-menu.jpg',
+  ]);
+});
+
 test('init-prompt creates a customizable prompt file and protects it', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-prompt-'));
   const promptPath = path.join(tempDir, 'naver-blog-prompt.md');

@@ -4,6 +4,64 @@ const seId = () => `SE-${crypto.randomUUID()}`;
 
 const stripTags = (html) => String(html || '').replace(/<[^>]*>/g, '').trim();
 
+const isPhotoPlaceholder = (text) => {
+  const normalized = String(text || '').trim();
+  return /^\[(?:추가 사진 필요:\s*)?[^\]]*사진[^\]]*\]$/.test(normalized);
+};
+
+const collectStringValues = (value, strings = []) => {
+  if (typeof value === 'string') {
+    strings.push(value);
+    return strings;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectStringValues(item, strings));
+    return strings;
+  }
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach((item) => collectStringValues(item, strings));
+  }
+  return strings;
+};
+
+const componentIsPhotoPlaceholder = (component) => {
+  if (component?.['@ctype'] === 'image') return false;
+  const textValues = collectStringValues(component);
+  return textValues.some(isPhotoPlaceholder);
+};
+
+const mergeImageComponentsIntoPlaceholders = (components, imageComponents = []) => {
+  if (!imageComponents.length) return components;
+
+  const hasPlaceholders = components.some(componentIsPhotoPlaceholder);
+  if (!hasPlaceholders) return [...imageComponents, ...components];
+
+  let imageIndex = 0;
+  const merged = [];
+
+  components.forEach((component) => {
+    if (!componentIsPhotoPlaceholder(component)) {
+      merged.push(component);
+      return;
+    }
+
+    const nextImage = imageComponents[imageIndex];
+    if (nextImage) {
+      merged.push(nextImage);
+      imageIndex += 1;
+      return;
+    }
+
+    merged.push(component);
+  });
+
+  if (imageIndex < imageComponents.length) {
+    merged.push(...imageComponents.slice(imageIndex));
+  }
+
+  return merged;
+};
+
 const textComponent = (text, opts = {}) => ({
   id: seId(),
   layout: 'default',
@@ -65,8 +123,12 @@ const fallbackHtmlToComponents = (html, imageComponents = []) => {
     .filter(Boolean);
 
   const components = [];
-  components.push(...imageComponents);
   parts.forEach((part, index) => {
+    if (isPhotoPlaceholder(part)) {
+      components.push(textComponent(part));
+      return;
+    }
+
     const heading = index === 0 || part.length < 34;
     components.push(textComponent(part, heading ? {
       fontSize: index === 0 ? 'fs28' : 'fs24',
@@ -75,19 +137,22 @@ const fallbackHtmlToComponents = (html, imageComponents = []) => {
       ctype: index === 0 ? 'text' : 'quotation',
     } : {}));
   });
-  return components;
+  return mergeImageComponentsIntoPlaceholders(components, imageComponents);
 };
 
 const htmlToComponents = async (client, html, imageComponents = []) => {
   const converted = await client.convertHtmlToComponents(html);
   if (Array.isArray(converted) && converted.length > 0) {
-    return [...imageComponents, ...converted];
+    return mergeImageComponentsIntoPlaceholders(converted, imageComponents);
   }
   return fallbackHtmlToComponents(html, imageComponents);
 };
 
 module.exports = {
+  fallbackHtmlToComponents,
   htmlToComponents,
   imageComponent,
+  isPhotoPlaceholder,
+  mergeImageComponentsIntoPlaceholders,
   textComponent,
 };

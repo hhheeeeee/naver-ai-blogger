@@ -22,9 +22,10 @@ Codex 플러그인으로 사용하려면 이 repo를 marketplace로 추가합니
 
 ```bash
 codex plugin marketplace add hhheeeeee/naver-ai-blogger
+codex plugin add naver-ai-blogger@naver-ai-blogger-marketplace
 ```
 
-그 다음 Codex를 재시작하고 `/plugins`에서 `Naver AI Blogger`를 설치/활성화하세요.
+Codex 앱에서는 marketplace 추가 후 `/plugins`에서 `Naver AI Blogger`를 설치/활성화해도 됩니다.
 
 ## CLI 사용
 
@@ -78,7 +79,7 @@ npx naver-ai-blogger blog \
   --tags "맛집,방문후기"
 ```
 
-`--images`는 필수입니다. 쉼표로 여러 파일을 넘기거나 `./photos/*.jpg` 같은 단순 glob을 사용할 수 있습니다. 파일을 찾지 못하면 네이버 API 호출 전에 중단합니다.
+`--images`는 필수입니다. 쉼표로 여러 파일을 넘기거나 `./photos/*.jpg` 같은 단순 glob을 사용할 수 있습니다. glob 결과는 파일명 기준 자연 정렬이 적용되므로 `01-외관.jpg`, `02-입구.jpg`처럼 숫자 prefix를 붙이면 사진 배치 순서를 안정적으로 맞출 수 있습니다. 파일을 찾지 못하면 네이버 API 호출 전에 중단합니다.
 
 `--content-file`을 넘기지 않으면 CLI가 짧은 기본 후기 HTML을 사용합니다. Codex가 사진과 사용자 메모를 바탕으로 글을 쓰는 흐름에서는 `work/naver-blog-post.html` 같은 HTML 파일을 먼저 만든 뒤 `--content-file`로 넘기는 방식을 권장합니다.
 
@@ -145,6 +146,8 @@ Codex에서 아래처럼 요청합니다.
 ## 글쓰기 프롬프트 커스터마이즈
 
 기본 맛집 후기 작성 프롬프트는 [prompts/restaurant-review.md](prompts/restaurant-review.md)에 있습니다. 기본값은 네이버 맛집 인플루언서 톤, 2,000~3,000자 내외, 사진과 글이 번갈아 나오는 구성, 제목 후보 10개, 해시태그 25개, 한 줄 총평을 기준으로 합니다.
+
+본문 HTML에 `<p>[외관 사진]</p>`, `<p>[대표 메뉴 사진]</p>`처럼 독립 문단으로 사진 위치를 넣으면, 발행 시 업로드된 사진이 해당 위치에 순서대로 들어갑니다. 사진 위치 표기가 없으면 기존 호환성을 위해 업로드 이미지가 본문 앞쪽에 들어갑니다.
 
 사용자가 프롬프트를 수정하고 싶으면 아래 파일을 만들면 됩니다.
 

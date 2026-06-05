@@ -26,7 +26,7 @@
   ],
   "scripts": {
     "start": "node bin/naver-ai-blogger.js",
-    "check": "node --check bin/naver-ai-blogger.js && node --check bin/naver.js && node --check bin/naver-blog.js && node --check src/cli.js && node --check src/naver/auth.js && node --check src/naver/client.js && node --check src/naver/editor.js && node --check src/naver/images.js && node --check src/naver/session.js && node --check src/naver/utils.js && node --check test/cli.test.js",
+    "check": "node --check bin/naver-ai-blogger.js && node --check bin/naver.js && node --check bin/naver-blog.js && node --check src/cli.js && node --check src/naver/auth.js && node --check src/naver/client.js && node --check src/naver/editor.js && node --check src/naver/images.js && node --check src/naver/session.js && node --check src/naver/utils.js && node --check test/cli.test.js && node --check test/editor.test.js",
     "test": "node --test"
   },
   "engines": {

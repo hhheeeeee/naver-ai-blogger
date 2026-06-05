@@ -85,6 +85,11 @@ const parseList = (value) => String(value || '')
   .map((item) => item.trim())
   .filter(Boolean);
 
+const comparePathNames = (a, b) => a.localeCompare(b, 'ko', {
+  numeric: true,
+  sensitivity: 'base',
+});
+
 const expandSimpleGlob = (pattern) => {
   if (!pattern.includes('*')) return [pattern];
   const dir = path.resolve(path.dirname(pattern));
@@ -94,6 +99,7 @@ const expandSimpleGlob = (pattern) => {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir)
     .filter((entry) => regex.test(entry))
+    .sort(comparePathNames)
     .map((entry) => path.join(dir, entry));
 };
 
