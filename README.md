@@ -30,22 +30,22 @@ Codex 앱에서는 marketplace 추가 후 `/plugins`에서 `Naver AI Blogger`를
 
 ## Codex에서 쓰는 법
 
-Codex에서 아래처럼 요청합니다.
+Codex에서 skill을 명시하려면 `$naver` 또는 `$naver-blog`로 요청합니다. 앱/CLI에서 `/skills`를 열고 `naver` 또는 `naver-blog`를 선택해도 됩니다.
 
 ```text
-/naver --userid <id> --userpw <password>
+$naver --userid <id> --userpw <password>
 ```
 
 또는:
 
 ```text
-/naver-blog 블로그이름: 식당 이름
+$naver-blog 블로그이름: 식당 이름
 주소: 서울시 ...
 사진: ./photos/*.jpg
 태그: 맛집,점심
 ```
 
-현재 Codex 플러그인은 skill을 설치해 Codex가 해당 workflow를 따르게 하는 구조입니다.
+`/naver`처럼 바로 치는 slash command가 아니라, 설치된 skill을 `$`로 호출하거나 `/skills`에서 선택하는 구조입니다. 플러그인을 막 설치하거나 업데이트했다면 새 thread를 열거나 Codex를 재시작한 뒤 다시 확인하세요.
 
 ## 글쓰기 프롬프트 커스터마이즈
 

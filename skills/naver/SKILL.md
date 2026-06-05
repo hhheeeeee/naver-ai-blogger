@@ -1,11 +1,11 @@
 ---
 name: naver
-description: "Naver Blog login helper. Use when the user says /naver, asks to login to Naver, or needs a persisted Naver Blog session."
+description: "Naver Blog login helper. Use when the user invokes $naver, asks to login to Naver, or needs a persisted Naver Blog session."
 ---
 
 # Naver Login
 
-Use this skill when the user asks for `/naver`, "네이버 로그인", or Naver session setup.
+Use this skill when the user invokes `$naver`, asks for "네이버 로그인", or needs Naver session setup.
 
 ## Behavior
 

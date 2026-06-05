@@ -1,11 +1,11 @@
 ---
 name: naver-blog
-description: "Publish a restaurant review to Naver Blog from a restaurant name, address, and uploaded photos. Use when the user says /naver-blog."
+description: "Publish a restaurant review to Naver Blog from a restaurant name, address, and uploaded photos. Use when the user invokes $naver-blog."
 ---
 
 # Naver Blog Publishing
 
-Use this skill when the user says `/naver-blog`, asks to publish a Naver Blog post, or provides a restaurant name, address, and photos.
+Use this skill when the user invokes `$naver-blog`, asks to publish a Naver Blog post, or provides a restaurant name, address, and photos.
 
 ## Inputs
 
