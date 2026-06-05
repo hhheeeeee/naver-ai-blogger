@@ -16,7 +16,7 @@ If `USERID` or `USERPW` is missing, ask me for only the missing value. Do not pr
 Run the Naver AI Blogger CLI using the GitHub package spec if the local package is not available:
 
 ```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger login --userid "<id>" --userpw "<password>"
+npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver --userid "<id>" --userpw "<password>"
 ```
 
 Then verify:

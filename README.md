@@ -34,12 +34,15 @@ codex plugin marketplace add hhheeeeee/naver-ai-blogger
 
 ```bash
 npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger --help
+npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver --help
+npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog --help
 ```
 
 로그인:
 
 ```bash
 npx naver-ai-blogger login --userid "<naver-id>" --userpw "<naver-password>"
+npx naver --userid "<naver-id>" --userpw "<naver-password>"
 ```
 
 필수값을 빼먹으면 CLI가 어떤 값이 필요한지 에러로 알려줍니다. 환경변수로도 넣을 수 있습니다.
@@ -71,6 +74,16 @@ npx naver-ai-blogger blog \
   --images "./photos/*.jpg" \
   --content-file work/naver-blog-post.html \
   --tags "맛집,방문후기"
+```
+
+GitHub에서 바로 실행할 때:
+
+```bash
+npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
+  --blog-name "식당 이름" \
+  --restaurant-address "서울시 ..." \
+  --images "./photos/*.jpg" \
+  --content-file work/naver-blog-post.html
 ```
 
 기본 세션 파일은 `~/.naver-ai-blogger/naver-session.json`입니다. 다른 경로를 쓰려면 `--session <path>`를 붙이세요.

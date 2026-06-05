@@ -25,13 +25,13 @@ npx naver-ai-blogger login --userid "<id>" --userpw "<password>"
 Any workspace after GitHub publication:
 
 ```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger login --userid "<id>" --userpw "<password>"
+npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver --userid "<id>" --userpw "<password>"
 ```
 
 5. If Naver blocks automation, captcha appears, or 2FA is needed, rerun with:
 
 ```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger login --userid "<id>" --userpw "<password>" --manual
+npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver --userid "<id>" --userpw "<password>" --manual
 ```
 
 6. Verify the saved session:

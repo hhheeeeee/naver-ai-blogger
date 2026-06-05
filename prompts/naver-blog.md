@@ -16,7 +16,7 @@ If `BLOG_NAME`, `ADDRESS`, or `IMAGES` is missing, ask me for only the missing v
 Write polished Korean HTML content into `work/naver-blog-post.html`, then publish with:
 
 ```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger blog \
+npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
   --blog-name "<restaurant name>" \
   --restaurant-address "<address>" \
   --images "<comma-separated image paths or glob>" \

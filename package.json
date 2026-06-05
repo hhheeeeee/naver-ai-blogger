@@ -7,7 +7,9 @@
   "license": "MIT",
   "author": "Vicky",
   "bin": {
-    "naver-ai-blogger": "bin/naver-ai-blogger.js"
+    "naver-ai-blogger": "bin/naver-ai-blogger.js",
+    "naver": "bin/naver.js",
+    "naver-blog": "bin/naver-blog.js"
   },
   "files": [
     ".codex-plugin/",
@@ -23,7 +25,7 @@
   ],
   "scripts": {
     "start": "node bin/naver-ai-blogger.js",
-    "check": "node --check bin/naver-ai-blogger.js && node --check src/cli.js && node --check src/naver/auth.js && node --check src/naver/client.js && node --check src/naver/editor.js && node --check src/naver/images.js && node --check src/naver/session.js && node --check src/naver/utils.js"
+    "check": "node --check bin/naver-ai-blogger.js && node --check bin/naver.js && node --check bin/naver-blog.js && node --check src/cli.js && node --check src/naver/auth.js && node --check src/naver/client.js && node --check src/naver/editor.js && node --check src/naver/images.js && node --check src/naver/session.js && node --check src/naver/utils.js"
   },
   "engines": {
     "node": ">=20.0.0"

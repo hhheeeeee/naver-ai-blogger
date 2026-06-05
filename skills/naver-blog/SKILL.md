@@ -48,7 +48,7 @@ npx naver-ai-blogger blog \
 Any workspace after GitHub publication:
 
 ```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger blog \
+npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
   --blog-name "<restaurant name>" \
   --restaurant-address "<address>" \
   --images "<comma-separated image paths>" \
