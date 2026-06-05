@@ -40,25 +40,10 @@ Expected result: `naver-ai-blogger@naver-ai-blogger-marketplace` is installed an
 
 ## Naver Session
 
-1. Login locally:
-
-```bash
-npx naver-ai-blogger login --manual
-```
-
-2. Verify the session:
-
-```bash
-npx naver-ai-blogger status
-```
-
-3. Export for remote Codex:
-
-```bash
-npx naver-ai-blogger export-session --format base64
-```
-
-4. Store the output as the remote secret `NAVER_SESSION_BASE64`.
+1. Login locally through the installed Naver workflow.
+2. Verify that the saved session is usable.
+3. Export the session for remote Codex.
+4. Store the exported value as the remote secret `NAVER_SESSION_BASE64`.
 
 ## Blog Publish Smoke Test
 
@@ -70,29 +55,9 @@ npx naver-ai-blogger export-session --format base64
 03-main.jpg
 ```
 
-2. Create the draft prompt:
-
-```bash
-npx naver-ai-blogger draft-prompt \
-  --blog-name "식당 이름" \
-  --restaurant-address "서울시 ..." \
-  --images "./photos/*.jpg" \
-  --notes "대표 메뉴, 가격, 주차, 분위기 메모"
-```
-
-3. Ask Codex to read `work/naver-blog-draft-prompt.md` and write `work/naver-blog-post.html`.
-
-4. Run preflight:
-
-```bash
-npx naver-ai-blogger doctor \
-  --blog-name "식당 이름" \
-  --restaurant-address "서울시 ..." \
-  --images "./photos/*.jpg" \
-  --content-file work/naver-blog-post.html
-```
-
-5. Run dry-run smoke:
+2. Ask Codex to create `work/naver-blog-post.html` from the photos and review notes.
+3. Run a readiness check through the installed Naver workflow.
+4. Run dry-run smoke:
 
 ```bash
 NAVER_SMOKE_DOCTOR=1 scripts/live-smoke.sh \
@@ -102,7 +67,7 @@ NAVER_SMOKE_DOCTOR=1 scripts/live-smoke.sh \
   --content-file work/naver-blog-post.html
 ```
 
-6. Publish privately:
+5. Publish privately:
 
 ```bash
 NAVER_LIVE_PUBLISH=1 scripts/live-smoke.sh \
@@ -112,7 +77,7 @@ NAVER_LIVE_PUBLISH=1 scripts/live-smoke.sh \
   --content-file work/naver-blog-post.html
 ```
 
-7. Open the returned Naver Blog URL and verify:
+6. Open the returned Naver Blog URL and verify:
 
 - [ ] The post is private.
 - [ ] Images are interleaved with text instead of grouped at the top.

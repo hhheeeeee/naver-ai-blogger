@@ -17,7 +17,7 @@ What are you trying to publish?
 - [ ] Exporting session for remote Codex
 - [ ] Creating the draft prompt
 - [ ] Writing `work/naver-blog-post.html`
-- [ ] Running `doctor`
+- [ ] Readiness check
 - [ ] Dry-run
 - [ ] Private publish
 
@@ -28,14 +28,14 @@ Please share only non-secret details:
 - Restaurant name or a placeholder:
 - Address/region or a placeholder:
 - Number of photos:
-- Local/remote Codex:
-- `doctor` status: `ok` / `error`
+- Codex surface:
+- Readiness status: `ok` / `error`
 
 Do not paste passwords, cookies, `NAVER_SESSION_JSON`, or `NAVER_SESSION_BASE64`.
 
 ## Output
 
-Paste redacted command output here.
+Paste redacted output here.
 
 ```text
 

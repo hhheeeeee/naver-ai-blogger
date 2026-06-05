@@ -1,7 +1,7 @@
 {
   "name": "naver-ai-blogger",
   "version": "0.1.0",
-  "description": "Codex plugin and CLI for publishing restaurant posts to Naver Blog.",
+  "description": "Codex plugin for publishing restaurant posts to Naver Blog.",
   "private": false,
   "type": "commonjs",
   "license": "MIT",

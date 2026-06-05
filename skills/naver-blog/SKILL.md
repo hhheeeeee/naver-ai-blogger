@@ -35,62 +35,15 @@ If required values are missing, ask for only the missing values. For photos, acc
    - Plugin default prompt at `prompts/restaurant-review.md`.
 3. Write polished Korean HTML content for a Naver Blog restaurant review using the selected prompt.
 4. Keep the tone natural, specific, and useful. Avoid claiming facts that are not visible in the photos or provided by the user.
-5. Save the generated HTML under `work/naver-blog-post.html`. Prefer passing this file with `--content-file`; the CLI fallback is intentionally short and generic.
-6. If the inputs need to be normalized first, create a draft prompt file with `naver-ai-blogger draft-prompt`; then read that file and write the final HTML.
-7. Prefer the local repo CLI when the current workspace is this repository. Otherwise use the GitHub package spec.
-8. Before publishing, run `naver-ai-blogger doctor` when session or input readiness is uncertain. It checks required values, images, content file, and session cookies without calling Naver.
-9. If the user wants a preview or the session is not ready, run the publish command with `--dry-run` first. This validates image paths and prints the payload without calling Naver.
-10. Publish with one of these commands.
-
-Draft prompt helper:
-
-```bash
-npx naver-ai-blogger draft-prompt \
-  --blog-name "<restaurant name>" \
-  --restaurant-address "<address>" \
-  --images "<comma-separated image paths>" \
-  --notes "<user notes>" \
-  --output work/naver-blog-draft-prompt.md
-```
-
-Preflight helper:
-
-```bash
-npx naver-ai-blogger doctor \
-  --blog-name "<restaurant name>" \
-  --restaurant-address "<address>" \
-  --images "<comma-separated image paths>" \
-  --content-file work/naver-blog-post.html
-```
-
-Local repo checkout:
-
-```bash
-npx naver-ai-blogger blog \
-  --blog-name "<restaurant name>" \
-  --restaurant-address "<address>" \
-  --images "<comma-separated image paths>" \
-  --content-file work/naver-blog-post.html \
-  --tags "<comma-separated tags>"
-```
-
-Any workspace after GitHub publication:
-
-```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
-  --blog-name "<restaurant name>" \
-  --restaurant-address "<address>" \
-  --images "<comma-separated image paths>" \
-  --content-file work/naver-blog-post.html \
-  --tags "<comma-separated tags>"
-```
-
-11. If the session is missing or expired, use the `naver` skill to login first, then retry publishing.
+5. Save the generated HTML under `work/naver-blog-post.html`.
+6. If the inputs need to be normalized first, create a draft prompt file, then read that file and write the final HTML.
+7. Before publishing, run a readiness check when session or input readiness is uncertain. It should confirm required values, images, content file, and session cookies without calling Naver.
+8. If the user wants a preview or the session is not ready, run a dry-run style validation first.
+9. Publish through the installed Naver AI Blogger workflow.
+10. If the session is missing or expired, use the `naver` skill to login first, then retry publishing.
 
 ## Remote Codex Notes
 
 - Remote Codex must run in an environment that has the uploaded image files and a valid Naver session.
-- The CLI requires `--images`; if the image glob matches no files, fix the path before retrying.
 - If browser login is impossible in the remote environment, ask the user to provide a session through `NAVER_SESSION_JSON` or `NAVER_SESSION_BASE64`, or provide a session file and pass `--session`.
-- To create a remote secret from a local login, run `npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger export-session --format base64` and store the output as `NAVER_SESSION_BASE64`.
 - After publishing, return the final Naver Blog URL and any image upload errors.

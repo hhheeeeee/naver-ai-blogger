@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a problem with login, drafting, doctor checks, or Naver Blog publishing.
+about: Report a problem with login, drafting, readiness checks, or Naver Blog publishing.
 title: "[Bug] "
 labels: bug
 assignees: ""
@@ -10,13 +10,9 @@ assignees: ""
 
 Describe the problem and what you expected to happen.
 
-## Command
+## Workflow
 
-Paste the command shape, but remove credentials, cookie values, and session payloads.
-
-```bash
-
-```
+Describe the workflow step where the issue happened. Remove credentials, cookie values, and session payloads.
 
 ## Output
 
@@ -36,17 +32,9 @@ Paste relevant output. Do not include:
 
 - OS:
 - Node version:
-- Codex surface: CLI / Desktop / Remote
-- Package source: local clone / `github:hhheeeeee/naver-ai-blogger`
+- Codex surface: Desktop / Remote / other
+- Package source: local clone / marketplace
 
 ## Preflight
 
-If this is a publishing issue, run `doctor` and paste the redacted JSON:
-
-```bash
-npx naver-ai-blogger doctor \
-  --blog-name "..." \
-  --restaurant-address "..." \
-  --images "..." \
-  --content-file work/naver-blog-post.html
-```
+If this is a publishing issue, run a readiness check and paste the redacted result.

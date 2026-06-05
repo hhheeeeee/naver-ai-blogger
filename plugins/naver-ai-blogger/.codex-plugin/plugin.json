@@ -12,7 +12,7 @@
   "interface": {
     "displayName": "Naver AI Blogger",
     "shortDescription": "Publish restaurant posts to Naver Blog from Codex.",
-    "longDescription": "Provides Codex skills and a Node CLI for Naver login, persisted cookie sessions, local image upload, and Naver Blog publishing.",
+    "longDescription": "Provides Codex skills for Naver login, persisted cookie sessions, local image upload, and Naver Blog publishing.",
     "developerName": "Vicky",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],

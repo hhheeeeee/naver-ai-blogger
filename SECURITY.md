@@ -11,17 +11,7 @@ This project automates a browser login session and Naver Blog publishing. Treat 
 
 ## Captcha And 2FA
 
-This project does not bypass captcha, 2FA, or anti-abuse controls. If Naver asks for extra verification, use manual login:
-
-```bash
-npx naver-ai-blogger login --manual
-```
-
-After manual login succeeds, export the session for remote use:
-
-```bash
-npx naver-ai-blogger export-session --format base64
-```
+This project does not bypass captcha, 2FA, or anti-abuse controls. If Naver asks for extra verification, complete manual login in the browser and store only the resulting session.
 
 ## Public Publishing
 

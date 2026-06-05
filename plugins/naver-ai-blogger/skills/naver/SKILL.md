@@ -9,50 +9,17 @@ Use this skill when the user asks for `/naver`, "네이버 로그인", or Naver 
 
 ## Behavior
 
-1. Prefer the local repo CLI when the current workspace is this repository. Otherwise use the GitHub package spec so Codex can run it from any local or remote workspace.
-2. Collect required values:
+1. Collect required values:
    - `--userid` or `NAVER_USERID` / `NAVER_USERNAME`
    - `--userpw` or `NAVER_USERPW` / `NAVER_PASSWORD`
-3. If either value is missing, ask the user for the missing value. Do not invent credentials.
-4. Run one of these commands.
-
-Local repo checkout:
-
-```bash
-npx naver-ai-blogger login --userid "<id>" --userpw "<password>"
-```
-
-Any workspace after GitHub publication:
-
-```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver --userid "<id>" --userpw "<password>"
-```
-
-5. If Naver blocks automation, captcha appears, or 2FA is needed, rerun with:
-
-```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver --userid "<id>" --userpw "<password>" --manual
-```
-
-`--manual` can also run without `--userid` / `--userpw`; the user completes login, captcha, or 2FA in the browser. Do not try to bypass captcha or anti-abuse checks with randomized delays or stealth input. Pause for user completion and persist the resulting session instead.
-
-6. Verify the saved session:
-
-```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger status
-```
-
-7. When the user needs to publish from remote Codex, export the local session as a secret-friendly value:
-
-```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger export-session --format shell
-```
-
-Use the emitted `NAVER_SESSION_BASE64` value as a remote secret. Use `--format base64` if only the value is needed.
+2. If either value is missing, ask the user for the missing value. Do not invent credentials.
+3. Use the installed Naver AI Blogger workflow to log in and persist a reusable browser session.
+4. If Naver blocks automation, captcha appears, or 2FA is needed, switch to manual login. The user completes login, captcha, or 2FA in the browser. Do not try to bypass captcha or anti-abuse checks with randomized delays or stealth input.
+5. Verify that the saved session is usable before publishing.
+6. When the user needs to publish from remote Codex, help them export the local session as a secret-friendly value and store it as `NAVER_SESSION_BASE64`.
 
 ## Notes
 
-- The CLI stores cookies at `~/.naver-ai-blogger/naver-session.json` by default.
 - Remote Codex can also use `NAVER_SESSION_JSON` or `NAVER_SESSION_BASE64` when a session file cannot be stored.
 - Never print the password back to the user.
 - Explain that remote Codex can publish only when the remote environment has a valid session file or can complete login.

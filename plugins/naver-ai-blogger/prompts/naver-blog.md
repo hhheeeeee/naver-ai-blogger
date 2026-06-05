@@ -19,14 +19,6 @@ Use the writing prompt in this priority order:
 2. `work/naver-blog-prompt.md` if it exists.
 3. `prompts/restaurant-review.md` from the plugin/repo.
 
-Write polished Korean HTML content into `work/naver-blog-post.html`, then publish with:
-
-```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
-  --blog-name "<restaurant name>" \
-  --restaurant-address "<address>" \
-  --images "<comma-separated image paths or glob>" \
-  --content-file work/naver-blog-post.html
-```
+Write polished Korean HTML content into `work/naver-blog-post.html`, then publish through the installed Naver AI Blogger workflow.
 
 If login is missing or expired, use the `naver` skill first, then retry publishing.

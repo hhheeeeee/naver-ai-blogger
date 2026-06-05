@@ -13,14 +13,4 @@ $ARGUMENTS
 
 If `USERID` or `USERPW` is missing, ask me for only the missing value. Do not print the password back to me.
 
-Run the Naver AI Blogger CLI using the GitHub package spec if the local package is not available:
-
-```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver --userid "<id>" --userpw "<password>"
-```
-
-Then verify:
-
-```bash
-npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger status
-```
+Use the installed Naver AI Blogger workflow, then verify that the saved session is usable.
