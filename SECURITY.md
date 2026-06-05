@@ -30,6 +30,7 @@ Before making this repository public, run:
 ```bash
 npm run check
 npm test
+npm run scan:secrets
 npm run validate:plugin
 scripts/verify-public-install.sh
 ```

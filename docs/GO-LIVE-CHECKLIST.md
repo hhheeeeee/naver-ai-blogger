@@ -23,6 +23,7 @@ scripts/verify-public-install.sh
 npm run sync:plugin
 npm run check
 npm test
+npm run scan:secrets
 npm run validate:plugin
 npm pack --dry-run
 ```

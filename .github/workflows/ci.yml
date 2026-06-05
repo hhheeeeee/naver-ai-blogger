@@ -26,6 +26,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Scan for committed secrets
+        run: npm run scan:secrets
+
       - name: Validate plugin manifest
         run: npm run validate:plugin
 
