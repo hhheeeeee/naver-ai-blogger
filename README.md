@@ -76,6 +76,8 @@ npx naver-ai-blogger blog \
   --tags "맛집,방문후기"
 ```
 
+`--images`는 필수입니다. 쉼표로 여러 파일을 넘기거나 `./photos/*.jpg` 같은 단순 glob을 사용할 수 있습니다. 파일을 찾지 못하면 네이버 API 호출 전에 중단합니다.
+
 GitHub에서 바로 실행할 때:
 
 ```bash

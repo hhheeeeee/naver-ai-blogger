@@ -77,16 +77,26 @@ const runBlog = async (opts) => {
     await promptValue('식당 이름');
   const restaurantAddress = opts.restaurantAddress || opts.address ||
     await promptValue('식당 주소');
+  const imageInput = opts.images || opts.image ||
+    await promptValue('사진 경로 또는 glob');
   requireValue(blogName, 'blog-name');
   requireValue(restaurantAddress, 'restaurant-address');
+  requireValue(imageInput, 'images');
   const sessionPath = createDefaultSessionPath(opts.session);
   const client = createNaverClient({ sessionPath });
+
+  const imagePaths = resolveImageInputs(imageInput);
+  if (imagePaths.length === 0) {
+    throw new Error(`업로드할 이미지 파일을 찾지 못했습니다: ${imageInput}`);
+  }
 
   await client.initBlog();
   const categoryNo = opts.category || await client.getDefaultCategoryNo();
   const token = await client.getToken(categoryNo);
-  const imagePaths = resolveImageInputs(opts.images || opts.image);
   const uploadedImages = await uploadImages(client, imagePaths, token);
+  if (uploadedImages.components.length === 0) {
+    throw new Error(`네이버에 업로드된 이미지가 없습니다: ${uploadedImages.errors.map((item) => item.error).join(', ')}`);
+  }
   const content = readContent(opts) || buildRestaurantHtml({
     blogName,
     restaurantAddress,
