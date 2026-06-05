@@ -20,6 +20,16 @@ codex plugin add naver-ai-blogger@naver-ai-blogger-marketplace
 
 Codex 앱에서는 marketplace 추가 후 `/plugins`에서 `Naver AI Blogger`를 설치/활성화해도 됩니다.
 
+이미 설치한 사용자가 최신 버그픽스를 받으려면 marketplace를 갱신한 뒤 플러그인을 다시 설치합니다.
+
+```bash
+codex plugin marketplace upgrade naver-ai-blogger-marketplace
+codex plugin remove naver-ai-blogger@naver-ai-blogger-marketplace
+codex plugin add naver-ai-blogger@naver-ai-blogger-marketplace
+```
+
+그 다음 새 thread를 열거나 Codex를 재시작하세요.
+
 공개 전 전체 점검은 [docs/GO-LIVE-CHECKLIST.md](docs/GO-LIVE-CHECKLIST.md)를 따르세요. 세션과 자격 증명 취급 원칙은 [SECURITY.md](SECURITY.md)에 정리되어 있습니다.
 
 ## Codex에서 쓰는 법
