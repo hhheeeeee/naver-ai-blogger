@@ -38,6 +38,21 @@ const buildRestaurantHtml = ({ blogName, restaurantAddress, notes }) => {
   return lines.join('\n');
 };
 
+const runInitPrompt = async (opts) => {
+  const target = path.resolve(opts.output || 'work/naver-blog-prompt.md');
+  const source = path.resolve(__dirname, '..', 'prompts', 'restaurant-review.md');
+  if (fs.existsSync(target) && !opts.force) {
+    throw new Error(`프롬프트 파일이 이미 있습니다. 덮어쓰려면 --force를 사용하세요: ${target}`);
+  }
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.copyFileSync(source, target);
+  writeJson({
+    status: 'created',
+    promptPath: target,
+    source,
+  });
+};
+
 const runLogin = async (opts) => {
   const credentials = getCredentials(opts);
   const username = opts.manual ? credentials.username : credentials.username ||
@@ -190,6 +205,12 @@ const runCli = async (argv = process.argv) => {
     .option('--dry-run', 'Validate inputs and print the publish payload without calling Naver', false)
     .option('--session <path>', 'Path to the Naver cookie session JSON file');
   blog.action(runBlog);
+
+  const initPrompt = program.command('init-prompt')
+    .description('Copy the default restaurant review prompt for customization.')
+    .option('--output <path>', 'Prompt file path to create', 'work/naver-blog-prompt.md')
+    .option('--force', 'Overwrite an existing prompt file', false);
+  initPrompt.action(runInitPrompt);
 
   await program.parseAsync(argv);
 };

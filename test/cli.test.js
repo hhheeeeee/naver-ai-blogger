@@ -87,6 +87,38 @@ test('naver-blog dry-run validates local images and prints payload', () => {
   assert.match(payload.content, /테스트 후기/);
 });
 
+test('init-prompt creates a customizable prompt file and protects it', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-prompt-'));
+  const promptPath = path.join(tempDir, 'naver-blog-prompt.md');
+
+  const createResult = run([
+    'bin/naver-ai-blogger.js',
+    'init-prompt',
+    '--output',
+    promptPath,
+  ]);
+  assert.equal(createResult.status, 0);
+  assert.match(fs.readFileSync(promptPath, 'utf8'), /네이버 맛집 블로그/);
+
+  const secondResult = run([
+    'bin/naver-ai-blogger.js',
+    'init-prompt',
+    '--output',
+    promptPath,
+  ]);
+  assert.equal(secondResult.status, 1);
+  assert.match(secondResult.stderr, /이미 있습니다/);
+
+  const forceResult = run([
+    'bin/naver-ai-blogger.js',
+    'init-prompt',
+    '--output',
+    promptPath,
+    '--force',
+  ]);
+  assert.equal(forceResult.status, 0);
+});
+
 test('invalid NAVER_SESSION_JSON fails without reading a session file', () => {
   const result = run([
     'bin/naver-ai-blogger.js',

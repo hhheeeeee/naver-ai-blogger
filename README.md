@@ -150,6 +150,19 @@ Codex에서 아래처럼 요청합니다.
 
 ```bash
 mkdir -p work
+cp prompts/restaurant-review.md work/naver-blog-prompt.md
+```
+
+CLI로 기본 프롬프트를 복사할 수도 있습니다.
+
+```bash
+npx naver-ai-blogger init-prompt
+```
+
+그다음 원하는 스타일로 수정하세요.
+
+```bash
+mkdir -p work
 $EDITOR work/naver-blog-prompt.md
 ```
 
