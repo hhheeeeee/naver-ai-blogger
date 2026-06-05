@@ -153,7 +153,28 @@ Codex에서 아래처럼 요청합니다.
 
 ```bash
 npm run check
+npm test
 node bin/naver-ai-blogger.js --help
+```
+
+실제 계정으로 smoke test를 할 때는 먼저 세션을 준비한 뒤 기본 dry-run을 실행하세요.
+
+```bash
+scripts/live-smoke.sh \
+  --blog-name "식당 이름" \
+  --address "서울시 ..." \
+  --images "./photos/*.jpg" \
+  --content-file work/naver-blog-post.html
+```
+
+비공개 글로 실제 발행까지 확인하려면 `NAVER_LIVE_PUBLISH=1`을 설정합니다.
+
+```bash
+NAVER_LIVE_PUBLISH=1 scripts/live-smoke.sh \
+  --blog-name "식당 이름" \
+  --address "서울시 ..." \
+  --images "./photos/*.jpg" \
+  --content-file work/naver-blog-post.html
 ```
 
 ## Slash command처럼 쓰고 싶을 때
