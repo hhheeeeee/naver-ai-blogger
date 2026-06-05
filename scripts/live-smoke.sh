@@ -8,10 +8,11 @@ Usage:
 
 Environment:
   NAVER_SESSION_JSON or NAVER_SESSION_BASE64  Recommended for remote smoke tests.
+  NAVER_SMOKE_DOCTOR=1                       Run doctor preflight before dry-run.
   NAVER_LIVE_PUBLISH=1                       Actually publish a private Naver Blog post.
 
 Default behavior is dry-run only. It validates inputs and prints the payload without calling Naver.
-When NAVER_LIVE_PUBLISH=1 is set, this script publishes as private.
+When NAVER_LIVE_PUBLISH=1 is set, this script runs doctor first and then publishes as private.
 EOF
 }
 
@@ -55,6 +56,12 @@ if [[ -z "$blog_name" || -z "$address" || -z "$images" ]]; then
   exit 2
 fi
 
+doctor_cmd=(node bin/naver-ai-blogger.js doctor
+  --blog-name "$blog_name"
+  --restaurant-address "$address"
+  --images "$images"
+)
+
 cmd=(node bin/naver-blog.js
   --blog-name "$blog_name"
   --restaurant-address "$address"
@@ -62,12 +69,17 @@ cmd=(node bin/naver-blog.js
 )
 
 if [[ -n "$content_file" ]]; then
+  doctor_cmd+=(--content-file "$content_file")
   cmd+=(--content-file "$content_file")
 fi
 
 if [[ "${NAVER_LIVE_PUBLISH:-}" == "1" ]]; then
+  "${doctor_cmd[@]}"
   cmd+=(--private)
 else
+  if [[ "${NAVER_SMOKE_DOCTOR:-}" == "1" ]]; then
+    "${doctor_cmd[@]}"
+  fi
   cmd+=(--dry-run)
 fi
 

@@ -243,7 +243,18 @@ scripts/live-smoke.sh \
   --content-file work/naver-blog-post.html
 ```
 
+dry-run에서도 세션까지 함께 점검하려면 `NAVER_SMOKE_DOCTOR=1`을 붙입니다.
+
+```bash
+NAVER_SMOKE_DOCTOR=1 scripts/live-smoke.sh \
+  --blog-name "식당 이름" \
+  --address "서울시 ..." \
+  --images "./photos/*.jpg" \
+  --content-file work/naver-blog-post.html
+```
+
 비공개 글로 실제 발행까지 확인하려면 `NAVER_LIVE_PUBLISH=1`을 설정합니다.
+이 모드에서는 발행 전에 `doctor` preflight가 먼저 실행됩니다.
 
 ```bash
 NAVER_LIVE_PUBLISH=1 scripts/live-smoke.sh \
