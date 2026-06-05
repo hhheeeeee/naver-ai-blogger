@@ -1,0 +1,35 @@
+{
+  "name": "naver-ai-blogger",
+  "version": "0.1.0",
+  "description": "Codex plugin and CLI for publishing restaurant posts to Naver Blog.",
+  "private": false,
+  "type": "commonjs",
+  "license": "MIT",
+  "author": "Vicky",
+  "bin": {
+    "naver-ai-blogger": "bin/naver-ai-blogger.js"
+  },
+  "files": [
+    ".codex-plugin/",
+    ".agents/",
+    "bin/",
+    "prompts/",
+    "scripts/",
+    "skills/",
+    "src/",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "start": "node bin/naver-ai-blogger.js",
+    "check": "node --check bin/naver-ai-blogger.js && node --check src/cli.js && node --check src/naver/auth.js && node --check src/naver/client.js && node --check src/naver/editor.js && node --check src/naver/images.js && node --check src/naver/session.js && node --check src/naver/utils.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "commander": "^14.0.3",
+    "playwright": "^1.58.2"
+  }
+}
