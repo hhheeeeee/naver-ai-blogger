@@ -4,6 +4,14 @@ const { cookiesToHeader } = require('./session');
 const BLOG_HOST = 'https://blog.naver.com';
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
+const imageMimeType = (filename = '') => {
+  const ext = filename.toLowerCase().split('.').pop();
+  if (ext === 'png') return 'image/png';
+  if (ext === 'webp') return 'image/webp';
+  if (ext === 'gif') return 'image/gif';
+  return 'image/jpeg';
+};
+
 const withTimeout = async (fn) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
@@ -112,7 +120,7 @@ const createNaverClient = ({ sessionPath }) => {
     const sessionKey = await getUploadSessionKey(token);
     if (!sessionKey) throw new Error('네이버 이미지 업로드 세션 키를 가져오지 못했습니다.');
     const form = new FormData();
-    form.append('image', new Blob([buffer], { type: 'image/jpeg' }), filename || 'image.jpg');
+    form.append('image', new Blob([buffer], { type: imageMimeType(filename) }), filename || 'image.jpg');
     const url = `https://blog.upphoto.naver.com/${sessionKey}/simpleUpload/0?userId=${encodeURIComponent(id)}&extractExif=true&extractAnimatedCnt=true&autorotate=true&extractDominantColor=false&denyAnimatedImage=false&skipXcamFiltering=false`;
     const xml = await withTimeout(async (signal) => {
       const response = await fetch(url, {
@@ -129,7 +137,9 @@ const createNaverClient = ({ sessionPath }) => {
       return response.text();
     });
     const tag = (name) => xml.match(new RegExp(`<${name}>([^<]*)</${name}>`))?.[1] || '';
-    if (!tag('url')) throw new Error('네이버 이미지 업로드 응답에 URL이 없습니다.');
+    if (!tag('url')) {
+      throw new Error(`네이버 이미지 업로드 응답에 URL이 없습니다: ${xml.replace(/\s+/g, ' ').slice(0, 180)}`);
+    }
     return {
       url: tag('url'),
       width: Number(tag('width') || 600),
