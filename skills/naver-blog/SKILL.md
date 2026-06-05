@@ -30,7 +30,7 @@ If required values are missing, ask for only the missing values. For photos, acc
 1. Inspect image filenames and any user notes.
 2. Write polished Korean HTML content for a Naver Blog restaurant review.
 3. Keep the tone natural, specific, and useful. Avoid claiming facts that are not visible in the photos or provided by the user.
-4. Save the generated HTML under `work/naver-blog-post.html`.
+4. Save the generated HTML under `work/naver-blog-post.html`. Prefer passing this file with `--content-file`; the CLI fallback is intentionally short and generic.
 5. Prefer the local repo CLI when the current workspace is this repository. Otherwise use the GitHub package spec.
 6. Publish with one of these commands.
 
