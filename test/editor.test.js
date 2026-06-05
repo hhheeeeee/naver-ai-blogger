@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const {
   fallbackHtmlToComponents,
+  htmlToComponents,
   isPhotoPlaceholder,
   mergeImageComponentsIntoPlaceholders,
   textComponent,
@@ -13,6 +14,11 @@ const fakeImage = (fileName) => ({
 });
 
 const componentText = (component) => JSON.stringify(component);
+
+const multiParagraphComponent = (paragraphs) => ({
+  ...textComponent('seed'),
+  value: paragraphs.map((text) => textComponent(text).value[0]),
+});
 
 test('photo placeholder detection accepts Naver blog image markers', () => {
   assert.equal(isPhotoPlaceholder('[외관 사진]'), true);
@@ -69,4 +75,61 @@ test('unused images are appended after all placeholder replacements', () => {
     'text',
     'inside.jpg',
   ]);
+});
+
+test('placeholder replacement preserves text paragraphs grouped in one component', () => {
+  const merged = mergeImageComponentsIntoPlaceholders([
+    multiParagraphComponent([
+      '[외관 사진]',
+      '외관은 깔끔했고 입구가 찾기 쉬웠습니다.',
+      '처음 방문해도 부담 없는 분위기였습니다.',
+      '[대표 메뉴 사진]',
+      '대표 메뉴는 보기에도 먹음직스러웠습니다.',
+      '양도 적당해서 점심으로 괜찮았습니다.',
+      '[마무리 사진]',
+    ]),
+  ], [
+    fakeImage('outside.jpg'),
+    fakeImage('main.jpg'),
+    fakeImage('finish.jpg'),
+  ]);
+
+  assert.deepEqual(merged.map((component) => component.fileName || component['@ctype']), [
+    'outside.jpg',
+    'text',
+    'main.jpg',
+    'text',
+    'finish.jpg',
+  ]);
+  assert.match(componentText(merged[1]), /외관은 깔끔/);
+  assert.match(componentText(merged[1]), /부담 없는 분위기/);
+  assert.match(componentText(merged[3]), /대표 메뉴는/);
+  assert.match(componentText(merged[3]), /점심으로 괜찮/);
+  assert.doesNotMatch(componentText(merged), /\[외관 사진\]/);
+  assert.doesNotMatch(componentText(merged), /\[대표 메뉴 사진\]/);
+});
+
+test('HTML conversion falls back when converted components lose publish text', async () => {
+  const components = await htmlToComponents({
+    convertHtmlToComponents: async () => [
+      textComponent('[외관 사진]'),
+    ],
+  }, [
+    '<p>[외관 사진]</p>',
+    '<p>외관은 깔끔했고 입구가 찾기 쉬웠습니다.</p>',
+    '<p>[대표 메뉴 사진]</p>',
+    '<p>대표 메뉴는 보기에도 먹음직스러웠습니다.</p>',
+  ].join('\n'), [
+    fakeImage('outside.jpg'),
+    fakeImage('main.jpg'),
+  ]);
+
+  assert.deepEqual(components.map((component) => component.fileName || component['@ctype']), [
+    'outside.jpg',
+    'quotation',
+    'main.jpg',
+    'quotation',
+  ]);
+  assert.match(componentText(components), /외관은 깔끔/);
+  assert.match(componentText(components), /대표 메뉴는/);
 });

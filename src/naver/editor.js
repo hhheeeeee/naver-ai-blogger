@@ -30,33 +30,90 @@ const componentIsPhotoPlaceholder = (component) => {
   return textValues.some(isPhotoPlaceholder);
 };
 
+const paragraphText = (paragraph) => {
+  if (Array.isArray(paragraph?.nodes)) {
+    return paragraph.nodes
+      .map((node) => typeof node?.value === 'string' ? node.value : '')
+      .join('')
+      .trim();
+  }
+  return collectStringValues(paragraph).join('').trim();
+};
+
+const componentParagraphTexts = (component) => {
+  if (component?.['@ctype'] === 'image') return [];
+  if (Array.isArray(component?.value)) {
+    return component.value.map(paragraphText).filter(Boolean);
+  }
+  return collectStringValues(component).map((value) => value.trim()).filter(Boolean);
+};
+
+const hasPublishableText = (components) => components.some((component) =>
+  componentParagraphTexts(component).some((text) => !isPhotoPlaceholder(text)));
+
+const cloneComponentWithParagraphs = (component, paragraphs) => ({
+  ...component,
+  id: seId(),
+  value: paragraphs,
+});
+
+const splitComponentOnPhotoPlaceholders = (component, imageComponents, state) => {
+  if (component?.['@ctype'] === 'image') return [component];
+
+  if (!Array.isArray(component?.value)) {
+    if (!componentIsPhotoPlaceholder(component)) return [component];
+    const nextImage = imageComponents[state.imageIndex];
+    if (!nextImage) return [component];
+    state.imageIndex += 1;
+    return [nextImage];
+  }
+
+  const output = [];
+  let bufferedParagraphs = [];
+  let replaced = false;
+
+  const flushText = () => {
+    if (!bufferedParagraphs.length) return;
+    output.push(cloneComponentWithParagraphs(component, bufferedParagraphs));
+    bufferedParagraphs = [];
+  };
+
+  component.value.forEach((paragraph) => {
+    if (!isPhotoPlaceholder(paragraphText(paragraph))) {
+      bufferedParagraphs.push(paragraph);
+      return;
+    }
+
+    flushText();
+    replaced = true;
+    const nextImage = imageComponents[state.imageIndex];
+    if (nextImage) {
+      output.push(nextImage);
+      state.imageIndex += 1;
+    } else {
+      output.push(cloneComponentWithParagraphs(component, [paragraph]));
+    }
+  });
+
+  flushText();
+  return replaced ? output : [component];
+};
+
 const mergeImageComponentsIntoPlaceholders = (components, imageComponents = []) => {
   if (!imageComponents.length) return components;
 
   const hasPlaceholders = components.some(componentIsPhotoPlaceholder);
   if (!hasPlaceholders) return [...imageComponents, ...components];
 
-  let imageIndex = 0;
   const merged = [];
+  const state = { imageIndex: 0 };
 
   components.forEach((component) => {
-    if (!componentIsPhotoPlaceholder(component)) {
-      merged.push(component);
-      return;
-    }
-
-    const nextImage = imageComponents[imageIndex];
-    if (nextImage) {
-      merged.push(nextImage);
-      imageIndex += 1;
-      return;
-    }
-
-    merged.push(component);
+    merged.push(...splitComponentOnPhotoPlaceholders(component, imageComponents, state));
   });
 
-  if (imageIndex < imageComponents.length) {
-    merged.push(...imageComponents.slice(imageIndex));
+  if (state.imageIndex < imageComponents.length) {
+    merged.push(...imageComponents.slice(state.imageIndex));
   }
 
   return merged;
@@ -73,7 +130,7 @@ const textComponent = (text, opts = {}) => ({
       style: {
         fontColor: '#333333',
         fontSizeCode: opts.fontSize || 'fs16',
-        bold: opts.bold ? 'true' : 'false',
+        bold: Boolean(opts.bold),
         '@ctype': 'nodeStyle',
       },
       '@ctype': 'textNode',
@@ -141,9 +198,12 @@ const fallbackHtmlToComponents = (html, imageComponents = []) => {
 };
 
 const htmlToComponents = async (client, html, imageComponents = []) => {
+  const htmlComponents = fallbackHtmlToComponents(html);
+  const htmlHasText = hasPublishableText(htmlComponents);
   const converted = await client.convertHtmlToComponents(html);
   if (Array.isArray(converted) && converted.length > 0) {
-    return mergeImageComponentsIntoPlaceholders(converted, imageComponents);
+    const merged = mergeImageComponentsIntoPlaceholders(converted, imageComponents);
+    if (!htmlHasText || hasPublishableText(merged)) return merged;
   }
   return fallbackHtmlToComponents(html, imageComponents);
 };
