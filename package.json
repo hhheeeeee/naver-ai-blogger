@@ -15,6 +15,7 @@
     ".codex-plugin/",
     ".agents/",
     "bin/",
+    "docs/",
     "prompts/",
     "plugins/",
     "scripts/",
@@ -23,6 +24,7 @@
     "test/",
     "marketplace.json",
     "README.md",
+    "SECURITY.md",
     "LICENSE",
     "NOTICE"
   ],

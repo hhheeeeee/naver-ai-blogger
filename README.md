@@ -33,6 +33,8 @@ Codex 앱에서는 marketplace 추가 후 `/plugins`에서 `Naver AI Blogger`를
 scripts/verify-public-install.sh
 ```
 
+공개 전 전체 점검은 [docs/GO-LIVE-CHECKLIST.md](docs/GO-LIVE-CHECKLIST.md)를 따르세요. 세션과 자격 증명 취급 원칙은 [SECURITY.md](SECURITY.md)에 정리되어 있습니다.
+
 ## CLI 사용
 
 이 repo를 clone한 상태에서는 `npx naver-ai-blogger ...`를 쓰면 됩니다.
