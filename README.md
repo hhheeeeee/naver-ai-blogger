@@ -189,10 +189,14 @@ $EDITOR work/naver-blog-prompt.md
 ## 개발
 
 ```bash
+npm run sync:plugin
 npm run check
 npm test
+npm run validate:plugin
 node bin/naver-ai-blogger.js --help
 ```
+
+`skills/`, `prompts/`, `.codex-plugin/`을 수정했다면 `npm run sync:plugin`으로 `plugins/naver-ai-blogger/` marketplace wrapper를 갱신하세요. `npm run validate:plugin`은 root copy와 wrapper copy가 어긋나면 실패합니다.
 
 실제 계정으로 smoke test를 할 때는 먼저 세션을 준비한 뒤 기본 dry-run을 실행하세요.
 

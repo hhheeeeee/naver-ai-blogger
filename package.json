@@ -28,8 +28,9 @@
   ],
   "scripts": {
     "start": "node bin/naver-ai-blogger.js",
-    "check": "node --check bin/naver-ai-blogger.js && node --check bin/naver.js && node --check bin/naver-blog.js && node --check scripts/validate-plugin.js && node --check src/cli.js && node --check src/naver/auth.js && node --check src/naver/client.js && node --check src/naver/editor.js && node --check src/naver/images.js && node --check src/naver/session.js && node --check src/naver/utils.js && node --check test/cli.test.js && node --check test/editor.test.js && bash -n scripts/install-prompts.sh && bash -n scripts/live-smoke.sh && bash -n scripts/verify-public-install.sh",
+    "check": "node --check bin/naver-ai-blogger.js && node --check bin/naver.js && node --check bin/naver-blog.js && node --check scripts/sync-plugin-wrapper.js && node --check scripts/validate-plugin.js && node --check src/cli.js && node --check src/naver/auth.js && node --check src/naver/client.js && node --check src/naver/editor.js && node --check src/naver/images.js && node --check src/naver/session.js && node --check src/naver/utils.js && node --check test/cli.test.js && node --check test/editor.test.js && bash -n scripts/install-prompts.sh && bash -n scripts/live-smoke.sh && bash -n scripts/verify-public-install.sh",
     "test": "node --test",
+    "sync:plugin": "node scripts/sync-plugin-wrapper.js",
     "validate:plugin": "node scripts/validate-plugin.js"
   },
   "engines": {
