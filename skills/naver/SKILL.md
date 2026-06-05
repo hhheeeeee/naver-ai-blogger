@@ -43,5 +43,6 @@ npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger s
 ## Notes
 
 - The CLI stores cookies at `~/.naver-ai-blogger/naver-session.json` by default.
+- Remote Codex can also use `NAVER_SESSION_JSON` or `NAVER_SESSION_BASE64` when a session file cannot be stored.
 - Never print the password back to the user.
 - Explain that remote Codex can publish only when the remote environment has a valid session file or can complete login.

@@ -62,5 +62,5 @@ npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
 
 - Remote Codex must run in an environment that has the uploaded image files and a valid Naver session.
 - The CLI requires `--images`; if the image glob matches no files, fix the path before retrying.
-- If browser login is impossible in the remote environment, ask the user to provide a session file through a secure workspace secret or run login once in an environment that can open the browser.
+- If browser login is impossible in the remote environment, ask the user to provide a session through `NAVER_SESSION_JSON` or `NAVER_SESSION_BASE64`, or provide a session file and pass `--session`.
 - After publishing, return the final Naver Blog URL and any image upload errors.

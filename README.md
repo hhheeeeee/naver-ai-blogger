@@ -90,6 +90,24 @@ npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
 
 기본 세션 파일은 `~/.naver-ai-blogger/naver-session.json`입니다. 다른 경로를 쓰려면 `--session <path>`를 붙이세요.
 
+원격 Codex처럼 세션 파일을 두기 어려운 환경에서는 secret/env로 세션을 넣을 수 있습니다.
+
+```bash
+export NAVER_SESSION_JSON="$(cat ~/.naver-ai-blogger/naver-session.json)"
+```
+
+줄바꿈/따옴표 처리가 불편하면 base64를 사용하세요.
+
+```bash
+export NAVER_SESSION_BASE64="$(base64 -i ~/.naver-ai-blogger/naver-session.json)"
+```
+
+Linux 환경에서 `base64 -i`가 지원되지 않으면 Node로 만들 수 있습니다.
+
+```bash
+export NAVER_SESSION_BASE64="$(node -e "process.stdout.write(require('fs').readFileSync(process.argv[1]).toString('base64'))" ~/.naver-ai-blogger/naver-session.json)"
+```
+
 ## Codex에서 쓰는 법
 
 Codex에서 아래처럼 요청합니다.
@@ -114,9 +132,9 @@ Codex에서 아래처럼 요청합니다.
 원격 Codex에서도 발행은 가능합니다. 다만 다음 두 가지가 필요합니다.
 
 - 사진 파일이 원격 Codex workspace 안에 있어야 합니다.
-- 네이버 세션 파일이 원격 환경에 있거나, 원격 환경에서 로그인을 완료할 수 있어야 합니다.
+- 네이버 세션 파일이 원격 환경에 있거나, `NAVER_SESSION_JSON` / `NAVER_SESSION_BASE64` secret이 설정되어 있어야 합니다.
 
-브라우저 로그인이나 2FA가 원격에서 어렵다면 로컬에서 로그인 후 세션 파일을 안전한 secret 또는 workspace 파일로 전달하고 `--session`으로 지정하세요.
+브라우저 로그인이나 2FA가 원격에서 어렵다면 로컬에서 로그인 후 세션 파일을 안전한 secret으로 전달하세요. 파일로 전달한 경우에는 `--session`으로 지정하면 됩니다.
 
 ## 개발
 
