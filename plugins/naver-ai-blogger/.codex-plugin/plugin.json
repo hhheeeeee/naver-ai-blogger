@@ -1,0 +1,25 @@
+{
+  "name": "naver-ai-blogger",
+  "version": "0.1.0",
+  "description": "Login to Naver and publish Codex-written restaurant posts to Naver Blog.",
+  "author": {
+    "name": "Vicky"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/hhheeeeee/naver-ai-blogger",
+  "keywords": ["naver", "blog", "codex", "restaurant", "publishing"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Naver AI Blogger",
+    "shortDescription": "Publish restaurant posts to Naver Blog from Codex.",
+    "longDescription": "Provides Codex skills and a Node CLI for Naver login, persisted cookie sessions, local image upload, and Naver Blog publishing.",
+    "developerName": "Vicky",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Use naver to login with my Naver credentials.",
+      "Use naver-blog to publish a restaurant post with these photos."
+    ],
+    "brandColor": "#03C75A"
+  }
+}
