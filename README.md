@@ -27,6 +27,12 @@ codex plugin add naver-ai-blogger@naver-ai-blogger-marketplace
 
 Codex 앱에서는 marketplace 추가 후 `/plugins`에서 `Naver AI Blogger`를 설치/활성화해도 됩니다.
 
+공개 배포 전에는 repo가 public인지 확인하세요. private repo이면 GitHub 인증이 없는 Codex CLI/remote 환경에서는 marketplace clone과 `npm exec --package github:...` 실행이 실패합니다.
+
+```bash
+scripts/verify-public-install.sh
+```
+
 ## CLI 사용
 
 이 repo를 clone한 상태에서는 `npx naver-ai-blogger ...`를 쓰면 됩니다.
