@@ -142,6 +142,19 @@ Codex에서 아래처럼 요청합니다.
 
 현재 Codex 플러그인은 임의의 새 slash command 실행기를 직접 등록하기보다 skill을 설치해 Codex가 해당 workflow를 따르게 하는 구조입니다. 따라서 실제 실행은 skill 지침에 따라 `npx naver-ai-blogger ...` CLI로 수행됩니다.
 
+## 글쓰기 프롬프트 커스터마이즈
+
+기본 맛집 후기 작성 프롬프트는 [prompts/restaurant-review.md](prompts/restaurant-review.md)에 있습니다. 기본값은 네이버 맛집 인플루언서 톤, 2,000~3,000자 내외, 사진과 글이 번갈아 나오는 구성, 제목 후보 10개, 해시태그 25개, 한 줄 총평을 기준으로 합니다.
+
+사용자가 프롬프트를 수정하고 싶으면 아래 파일을 만들면 됩니다.
+
+```bash
+mkdir -p work
+$EDITOR work/naver-blog-prompt.md
+```
+
+`naver-blog` skill은 사용자 요청에 직접 포함된 프롬프트를 최우선으로 보고, 그다음 `work/naver-blog-prompt.md`, 마지막으로 기본 `prompts/restaurant-review.md`를 사용합니다.
+
 ## 원격 Codex에서의 주의점
 
 원격 Codex에서도 발행은 가능합니다. 다만 다음 두 가지가 필요합니다.

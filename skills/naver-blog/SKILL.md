@@ -21,6 +21,7 @@ Optional:
 - `tags`
 - `category`
 - `private`
+- custom writing prompt or prompt file path
 - extra notes about menu, price, parking, waiting, reservation, or atmosphere.
 
 If required values are missing, ask for only the missing values. For photos, accept uploaded files, paths, or a folder/glob such as `./photos/*.jpg`.
@@ -28,12 +29,16 @@ If required values are missing, ask for only the missing values. For photos, acc
 ## Writing Workflow
 
 1. Inspect image filenames and any user notes.
-2. Write polished Korean HTML content for a Naver Blog restaurant review.
-3. Keep the tone natural, specific, and useful. Avoid claiming facts that are not visible in the photos or provided by the user.
-4. Save the generated HTML under `work/naver-blog-post.html`. Prefer passing this file with `--content-file`; the CLI fallback is intentionally short and generic.
-5. Prefer the local repo CLI when the current workspace is this repository. Otherwise use the GitHub package spec.
-6. If the user wants a preview or the session is not ready, run the publish command with `--dry-run` first. This validates image paths and prints the payload without calling Naver.
-7. Publish with one of these commands.
+2. Load the writing prompt in this priority order:
+   - User-provided custom prompt in the current request.
+   - `work/naver-blog-prompt.md` if it exists.
+   - Plugin default prompt at `prompts/restaurant-review.md`.
+3. Write polished Korean HTML content for a Naver Blog restaurant review using the selected prompt.
+4. Keep the tone natural, specific, and useful. Avoid claiming facts that are not visible in the photos or provided by the user.
+5. Save the generated HTML under `work/naver-blog-post.html`. Prefer passing this file with `--content-file`; the CLI fallback is intentionally short and generic.
+6. Prefer the local repo CLI when the current workspace is this repository. Otherwise use the GitHub package spec.
+7. If the user wants a preview or the session is not ready, run the publish command with `--dry-run` first. This validates image paths and prints the payload without calling Naver.
+8. Publish with one of these commands.
 
 Local repo checkout:
 
@@ -57,7 +62,7 @@ npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
   --tags "<comma-separated tags>"
 ```
 
-8. If the session is missing or expired, use the `naver` skill to login first, then retry publishing.
+9. If the session is missing or expired, use the `naver` skill to login first, then retry publishing.
 
 ## Remote Codex Notes
 
