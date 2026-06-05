@@ -115,6 +115,18 @@ npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
 원격 Codex처럼 세션 파일을 두기 어려운 환경에서는 secret/env로 세션을 넣을 수 있습니다.
 
 ```bash
+npx naver-ai-blogger export-session --format shell
+```
+
+값만 필요하면 base64 형식으로 출력합니다.
+
+```bash
+npx naver-ai-blogger export-session --format base64
+```
+
+직접 환경변수를 만들 수도 있습니다.
+
+```bash
 export NAVER_SESSION_JSON="$(cat ~/.naver-ai-blogger/naver-session.json)"
 ```
 

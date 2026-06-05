@@ -90,5 +90,6 @@ const hasLoginCookies = async (context) => {
 module.exports = {
   cookiesToHeader,
   hasLoginCookies,
+  normalizeCookies,
   persistSession,
 };

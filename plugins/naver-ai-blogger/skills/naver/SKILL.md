@@ -42,6 +42,14 @@ npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver --userid "<i
 npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger status
 ```
 
+7. When the user needs to publish from remote Codex, export the local session as a secret-friendly value:
+
+```bash
+npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-ai-blogger export-session --format shell
+```
+
+Use the emitted `NAVER_SESSION_BASE64` value as a remote secret. Use `--format base64` if only the value is needed.
+
 ## Notes
 
 - The CLI stores cookies at `~/.naver-ai-blogger/naver-session.json` by default.

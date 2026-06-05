@@ -5,6 +5,7 @@ const { loginNaver } = require('./naver/auth');
 const { createNaverClient } = require('./naver/client');
 const { uploadImages } = require('./naver/images');
 const { htmlToComponents } = require('./naver/editor');
+const { normalizeCookies } = require('./naver/session');
 const {
   createDefaultSessionPath,
   getCredentials,
@@ -51,6 +52,37 @@ const runInitPrompt = async (opts) => {
     promptPath: target,
     source,
   });
+};
+
+const runExportSession = async (opts) => {
+  const sessionPath = createDefaultSessionPath(opts.session);
+  if (!fs.existsSync(sessionPath)) {
+    throw new Error(`세션 파일이 없습니다. 먼저 login을 실행하세요: ${sessionPath}`);
+  }
+
+  const payload = JSON.parse(fs.readFileSync(sessionPath, 'utf8'));
+  const cookies = normalizeCookies(payload);
+  if (cookies.length === 0) {
+    throw new Error(`네이버 쿠키가 없는 세션 파일입니다: ${sessionPath}`);
+  }
+
+  const encoded = Buffer.from(JSON.stringify(payload)).toString('base64');
+  if (opts.format === 'base64') {
+    process.stdout.write(`${encoded}\n`);
+    return;
+  }
+
+  if (opts.format === 'json') {
+    writeJson({
+      env: 'NAVER_SESSION_BASE64',
+      value: encoded,
+      cookieCount: cookies.length,
+      sessionPath,
+    });
+    return;
+  }
+
+  process.stdout.write(`export NAVER_SESSION_BASE64='${encoded}'\n`);
 };
 
 const runLogin = async (opts) => {
@@ -211,6 +243,14 @@ const runCli = async (argv = process.argv) => {
     .option('--output <path>', 'Prompt file path to create', 'work/naver-blog-prompt.md')
     .option('--force', 'Overwrite an existing prompt file', false);
   initPrompt.action(runInitPrompt);
+
+  const exportSession = program.command('export-session')
+    .description('Export the saved Naver session for remote Codex secrets.')
+    .option('--session <path>', 'Path to the Naver cookie session JSON file')
+    .addOption(new Option('--format <format>', 'Output format')
+      .choices(['shell', 'base64', 'json'])
+      .default('shell'));
+  exportSession.action(runExportSession);
 
   await program.parseAsync(argv);
 };

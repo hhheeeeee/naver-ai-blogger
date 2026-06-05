@@ -145,6 +145,57 @@ test('init-prompt creates a customizable prompt file and protects it', () => {
   assert.equal(forceResult.status, 0);
 });
 
+test('export-session emits a base64 remote secret from a saved session file', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-session-'));
+  const sessionPath = path.join(tempDir, 'naver-session.json');
+  const payload = {
+    cookies: [{
+      name: 'NID_AUT',
+      value: 'aut-cookie',
+      domain: '.naver.com',
+    }, {
+      name: 'OTHER',
+      value: 'other-cookie',
+      domain: '.example.com',
+    }],
+  };
+  fs.writeFileSync(sessionPath, JSON.stringify(payload));
+
+  const result = run([
+    'bin/naver-ai-blogger.js',
+    'export-session',
+    '--session',
+    sessionPath,
+    '--format',
+    'json',
+  ]);
+
+  assert.equal(result.status, 0);
+  const exported = JSON.parse(result.stdout);
+  assert.equal(exported.env, 'NAVER_SESSION_BASE64');
+  assert.equal(exported.cookieCount, 1);
+  assert.equal(exported.sessionPath, sessionPath);
+  assert.deepEqual(JSON.parse(Buffer.from(exported.value, 'base64').toString('utf8')), payload);
+});
+
+test('export-session rejects a session without Naver cookies', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-session-'));
+  const sessionPath = path.join(tempDir, 'naver-session.json');
+  fs.writeFileSync(sessionPath, JSON.stringify({
+    cookies: [{ name: 'SID', value: 'not-naver', domain: '.example.com' }],
+  }));
+
+  const result = run([
+    'bin/naver-ai-blogger.js',
+    'export-session',
+    '--session',
+    sessionPath,
+  ]);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /네이버 쿠키가 없는 세션 파일/);
+});
+
 test('invalid NAVER_SESSION_JSON fails without reading a session file', () => {
   const result = run([
     'bin/naver-ai-blogger.js',
