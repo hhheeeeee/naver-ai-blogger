@@ -222,6 +222,100 @@ test('draft-prompt uses a custom prompt file when present', () => {
   assert.match(fs.readFileSync(outputPath, 'utf8'), /커스텀 맛집 프롬프트/);
 });
 
+test('doctor reports ready when inputs and session are present', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-doctor-'));
+  const imagePath = path.join(tempDir, 'photo.jpg');
+  const contentPath = path.join(tempDir, 'post.html');
+  const sessionPath = path.join(tempDir, 'session.json');
+  fs.writeFileSync(imagePath, 'fake image bytes');
+  fs.writeFileSync(contentPath, '<h2>테스트 식당</h2>');
+  fs.writeFileSync(sessionPath, JSON.stringify({
+    cookies: [{ name: 'NID_AUT', value: 'aut-cookie', domain: '.naver.com' }],
+  }));
+
+  const result = run([
+    'bin/naver-ai-blogger.js',
+    'doctor',
+    '--blog-name',
+    '테스트 식당',
+    '--restaurant-address',
+    '서울',
+    '--images',
+    imagePath,
+    '--content-file',
+    contentPath,
+    '--session',
+    sessionPath,
+  ], {
+    env: {
+      NAVER_SESSION_JSON: '',
+      NAVER_SESSION_BASE64: '',
+    },
+  });
+
+  assert.equal(result.status, 0);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.status, 'ok');
+  assert.equal(payload.ready, true);
+  assert.deepEqual(payload.errors, []);
+  assert.equal(payload.imageCount, 1);
+  assert.equal(payload.sessionSource, sessionPath);
+});
+
+test('doctor reports missing publish requirements without calling Naver', () => {
+  const result = run([
+    'bin/naver-ai-blogger.js',
+    'doctor',
+    '--session',
+    '/tmp/no-session-file.json',
+  ], {
+    env: {
+      NAVER_SESSION_JSON: '',
+      NAVER_SESSION_BASE64: '',
+    },
+  });
+
+  assert.equal(result.status, 0);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.status, 'error');
+  assert.equal(payload.ready, false);
+  assert.match(payload.errors.join('\n'), /missing blog-name/);
+  assert.match(payload.errors.join('\n'), /missing restaurant-address/);
+  assert.match(payload.errors.join('\n'), /missing images/);
+  assert.match(payload.errors.join('\n'), /no Naver cookies/);
+});
+
+test('doctor accepts NAVER_SESSION_BASE64 for remote Codex readiness checks', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-doctor-'));
+  const imagePath = path.join(tempDir, 'photo.jpg');
+  fs.writeFileSync(imagePath, 'fake image bytes');
+  const sessionPayload = {
+    cookies: [{ name: 'NID_SES', value: 'ses-cookie', domain: '.naver.com' }],
+  };
+
+  const result = run([
+    'bin/naver-ai-blogger.js',
+    'doctor',
+    '--blog-name',
+    '테스트 식당',
+    '--restaurant-address',
+    '서울',
+    '--images',
+    imagePath,
+  ], {
+    env: {
+      NAVER_SESSION_JSON: '',
+      NAVER_SESSION_BASE64: Buffer.from(JSON.stringify(sessionPayload)).toString('base64'),
+    },
+  });
+
+  assert.equal(result.status, 0);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.status, 'ok');
+  assert.equal(payload.sessionSource, 'NAVER_SESSION_BASE64');
+  assert.deepEqual(payload.warnings, ['content-file not provided; publish will use short fallback HTML']);
+});
+
 test('export-session emits a base64 remote secret from a saved session file', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'naver-ai-blogger-session-'));
   const sessionPath = path.join(tempDir, 'naver-session.json');

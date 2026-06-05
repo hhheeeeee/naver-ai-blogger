@@ -38,8 +38,9 @@ If required values are missing, ask for only the missing values. For photos, acc
 5. Save the generated HTML under `work/naver-blog-post.html`. Prefer passing this file with `--content-file`; the CLI fallback is intentionally short and generic.
 6. If the inputs need to be normalized first, create a draft prompt file with `naver-ai-blogger draft-prompt`; then read that file and write the final HTML.
 7. Prefer the local repo CLI when the current workspace is this repository. Otherwise use the GitHub package spec.
-8. If the user wants a preview or the session is not ready, run the publish command with `--dry-run` first. This validates image paths and prints the payload without calling Naver.
-9. Publish with one of these commands.
+8. Before publishing, run `naver-ai-blogger doctor` when session or input readiness is uncertain. It checks required values, images, content file, and session cookies without calling Naver.
+9. If the user wants a preview or the session is not ready, run the publish command with `--dry-run` first. This validates image paths and prints the payload without calling Naver.
+10. Publish with one of these commands.
 
 Draft prompt helper:
 
@@ -50,6 +51,16 @@ npx naver-ai-blogger draft-prompt \
   --images "<comma-separated image paths>" \
   --notes "<user notes>" \
   --output work/naver-blog-draft-prompt.md
+```
+
+Preflight helper:
+
+```bash
+npx naver-ai-blogger doctor \
+  --blog-name "<restaurant name>" \
+  --restaurant-address "<address>" \
+  --images "<comma-separated image paths>" \
+  --content-file work/naver-blog-post.html
 ```
 
 Local repo checkout:
@@ -74,7 +85,7 @@ npm exec --yes --package github:hhheeeeee/naver-ai-blogger -- naver-blog \
   --tags "<comma-separated tags>"
 ```
 
-10. If the session is missing or expired, use the `naver` skill to login first, then retry publishing.
+11. If the session is missing or expired, use the `naver` skill to login first, then retry publishing.
 
 ## Remote Codex Notes
 

@@ -102,6 +102,16 @@ npx naver-ai-blogger draft-prompt \
 
 그다음 Codex에게 `work/naver-blog-draft-prompt.md`를 읽고 `work/naver-blog-post.html`을 만들라고 요청한 뒤, 아래 발행 명령에 `--content-file work/naver-blog-post.html`을 넘기면 됩니다.
 
+발행 전에 로컬/원격 입력 상태를 점검하려면 `doctor`를 사용하세요. 네이버 API를 호출하지 않고 필수값, 이미지, 콘텐츠 파일, 세션 쿠키를 확인합니다.
+
+```bash
+npx naver-ai-blogger doctor \
+  --blog-name "식당 이름" \
+  --restaurant-address "서울시 ..." \
+  --images "./photos/*.jpg" \
+  --content-file work/naver-blog-post.html
+```
+
 네이버 API 호출 없이 입력과 발행 payload만 확인하려면 `--dry-run`을 붙입니다.
 
 ```bash

@@ -34,6 +34,89 @@ const readWritingPrompt = (opts = {}) => {
   };
 };
 
+const readSessionForDoctor = (sessionPath) => {
+  if (process.env.NAVER_SESSION_JSON) {
+    return {
+      source: 'NAVER_SESSION_JSON',
+      payload: JSON.parse(process.env.NAVER_SESSION_JSON),
+    };
+  }
+
+  if (process.env.NAVER_SESSION_BASE64) {
+    return {
+      source: 'NAVER_SESSION_BASE64',
+      payload: JSON.parse(Buffer.from(process.env.NAVER_SESSION_BASE64, 'base64').toString('utf8')),
+    };
+  }
+
+  if (!fs.existsSync(sessionPath)) {
+    return {
+      source: sessionPath,
+      payload: null,
+    };
+  }
+
+  return {
+    source: sessionPath,
+    payload: JSON.parse(fs.readFileSync(sessionPath, 'utf8')),
+  };
+};
+
+const runDoctor = async (opts) => {
+  const errors = [];
+  const warnings = [];
+  const blogName = opts.blogName;
+  const restaurantAddress = opts.restaurantAddress || opts.address;
+  const imageInput = opts.images || opts.image;
+  const sessionPath = createDefaultSessionPath(opts.session);
+
+  if (!blogName) errors.push('missing blog-name');
+  if (!restaurantAddress) errors.push('missing restaurant-address');
+  if (!imageInput) errors.push('missing images');
+
+  const imagePaths = imageInput ? resolveImageInputs(imageInput) : [];
+  if (imageInput && imagePaths.length === 0) {
+    errors.push(`no images matched: ${imageInput}`);
+  }
+
+  let contentFile = null;
+  if (opts.contentFile) {
+    contentFile = path.resolve(opts.contentFile);
+    if (!fs.existsSync(contentFile)) {
+      errors.push(`content file not found: ${contentFile}`);
+    } else if (!fs.readFileSync(contentFile, 'utf8').trim()) {
+      errors.push(`content file is empty: ${contentFile}`);
+    }
+  } else {
+    warnings.push('content-file not provided; publish will use short fallback HTML');
+  }
+
+  let session = null;
+  try {
+    session = readSessionForDoctor(sessionPath);
+    const cookies = normalizeCookies(session.payload);
+    if (cookies.length === 0) {
+      errors.push(`no Naver cookies found in session source: ${session.source}`);
+    }
+  } catch (error) {
+    errors.push(`session parse failed: ${error.message}`);
+  }
+
+  writeJson({
+    status: errors.length ? 'error' : 'ok',
+    ready: errors.length === 0,
+    errors,
+    warnings,
+    blogName: blogName || null,
+    restaurantAddress: restaurantAddress || null,
+    imageInput: imageInput || null,
+    imageCount: imagePaths.length,
+    imagePaths,
+    contentFile,
+    sessionSource: session?.source || sessionPath,
+  });
+};
+
 const buildDraftPrompt = ({
   blogName,
   restaurantAddress,
@@ -317,6 +400,17 @@ const runCli = async (argv = process.argv) => {
     .description('Verify the saved Naver session.')
     .option('--session <path>', 'Path to the Naver cookie session JSON file');
   status.action(runStatus);
+
+  const doctor = program.command('doctor')
+    .description('Check local inputs and session readiness before publishing.')
+    .option('--blog-name <name>', 'Restaurant or post subject name')
+    .addOption(new Option('--restaurant-address <address>', 'Restaurant address').conflicts('address'))
+    .option('--address <address>', 'Alias for --restaurant-address')
+    .option('--images <paths>', 'Comma-separated local image paths or glob patterns')
+    .option('--image <paths>', 'Alias for --images')
+    .option('--content-file <path>', 'Path to an HTML content file')
+    .option('--session <path>', 'Path to the Naver cookie session JSON file');
+  doctor.action(runDoctor);
 
   const blog = program.command('blog')
     .description('Publish a restaurant blog post to Naver Blog.')
