@@ -146,7 +146,7 @@ const buildDraftPrompt = ({
   '',
   `1. 위 입력값과 사진 파일명을 참고해 최종 발행용 HTML 본문을 작성한다.`,
   `2. 발행 전 식당명과 주소로 네이버 지도 링크, 영업시간, 브레이크타임, 라스트오더, 정기휴무, 예약/주차 가능 여부를 검색해 확인 가능한 정보만 본문 첫머리에 채운다.`,
-  `3. 본문 첫머리는 반드시 <h3 style="text-align:center;">📍 위치 정보</h3>, 네이버 지도 링크, <h3 style="text-align:center;">🕒 영업 정보</h3> 순서로 작성한다.`,
+  `3. 본문 첫머리는 반드시 <h2 style="text-align:center;">📍 위치 정보</h2>, 네이버 지도 링크, <h2 style="text-align:center;">🕒 영업 정보</h2> 순서로 작성한다.`,
   `4. 모든 일반 문장은 <p style="text-align:center;">문장.</p>처럼 한 문장당 한 문단으로 나누고, 답답하지 않게 <p><br></p>를 중간중간 넣는다.`,
   `5. 말투는 개인 네이버 맛집 블로그처럼 자연스러운 1인칭 구어체로 쓰고, AI 티 나는 보고서식 표현은 피한다.`,
   `6. 핵심 단어는 <span style="color:#ff0010;">문구</span>, <span style="color:#f28c00;">문구</span>처럼 8~12곳 정도만 색상 강조한다.`,
@@ -167,11 +167,11 @@ const buildDraftPrompt = ({
 
 const buildRestaurantHtml = ({ blogName, restaurantAddress, notes }) => {
   const lines = [
-    '<h3 style="text-align:center;">📍 위치 정보</h3>',
+    '<h2 style="text-align:center;">📍 위치 정보</h2>',
     `<p style="text-align:center;">${restaurantAddress}</p>`,
     '<p style="text-align:center;">네이버 지도 링크는 발행 전 확인해 넣어 주세요.</p>',
     '<p><br></p>',
-    '<h3 style="text-align:center;">🕒 영업 정보</h3>',
+    '<h2 style="text-align:center;">🕒 영업 정보</h2>',
     '<p style="text-align:center;"><span style="color:#ff0010;">영업시간</span>, 브레이크타임, 라스트오더, 정기휴무는 방문 전 네이버 지도에서 한 번 더 확인하는 것을 추천합니다.</p>',
     '<p><br></p>',
     `<h2 style="text-align:center;">${blogName}</h2>`,

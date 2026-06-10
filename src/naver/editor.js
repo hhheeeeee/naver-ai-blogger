@@ -159,6 +159,44 @@ const componentParagraphTexts = (component) => {
 const hasPublishableText = (components) => components.some((component) =>
   componentParagraphTexts(component).some((text) => !isPhotoPlaceholder(text)));
 
+const isInfoHeadingText = (text) => /(?:📍\s*)?위치\s*정보|(?:🕒\s*)?영업\s*정보/.test(String(text || ''));
+
+const emphasizeInfoHeadings = (components) => components.map((component) => {
+  if (component?.['@ctype'] === 'image' || !Array.isArray(component?.value)) return component;
+
+  let changed = false;
+  const value = component.value.map((paragraph) => {
+    const text = paragraphText(paragraph);
+    if (!isInfoHeadingText(text) || !Array.isArray(paragraph?.nodes)) return paragraph;
+    changed = true;
+    return {
+      ...paragraph,
+      nodes: paragraph.nodes.map((node) => ({
+        ...node,
+        style: {
+          ...(node.style || {}),
+          fontSizeCode: 'fs28',
+          bold: true,
+          '@ctype': 'nodeStyle',
+        },
+      })),
+      style: {
+        ...(paragraph.style || {}),
+        align: 'center',
+        lineHeight: paragraph.style?.lineHeight || '1.8',
+        '@ctype': 'paragraphStyle',
+      },
+    };
+  });
+
+  if (!changed) return component;
+  return {
+    ...component,
+    value,
+    '@ctype': component['@ctype'] === 'text' ? 'text' : 'quotation',
+  };
+});
+
 const cloneComponentWithParagraphs = (component, paragraphs) => ({
   ...component,
   id: seId(),
@@ -308,11 +346,11 @@ const fallbackHtmlToComponents = (html, imageComponents = []) => {
 
     if (isHeading) {
       const segments = parseInlineSegments(block.html, {
-        fontSize: block.tag === 'h1' || block.tag === 'h2' ? 'fs28' : 'fs24',
+        fontSize: block.tag === 'h1' || block.tag === 'h2' || isInfoHeadingText(part) ? 'fs28' : 'fs24',
         bold: true,
       });
       components.push(richTextComponent(segments, {
-        fontSize: block.tag === 'h1' || block.tag === 'h2' ? 'fs28' : 'fs24',
+        fontSize: block.tag === 'h1' || block.tag === 'h2' || isInfoHeadingText(part) ? 'fs28' : 'fs24',
         bold: true,
         align,
         ctype: block.tag === 'h1' || block.tag === 'h2' ? 'text' : 'quotation',
@@ -334,7 +372,7 @@ const fallbackHtmlToComponents = (html, imageComponents = []) => {
       }));
     });
   });
-  return mergeImageComponentsIntoPlaceholders(components, imageComponents);
+  return emphasizeInfoHeadings(mergeImageComponentsIntoPlaceholders(components, imageComponents));
 };
 
 const htmlToComponents = async (client, html, imageComponents = []) => {
@@ -342,13 +380,14 @@ const htmlToComponents = async (client, html, imageComponents = []) => {
   const htmlHasText = hasPublishableText(htmlComponents);
   const converted = await client.convertHtmlToComponents(html);
   if (Array.isArray(converted) && converted.length > 0) {
-    const merged = mergeImageComponentsIntoPlaceholders(converted, imageComponents);
+    const merged = emphasizeInfoHeadings(mergeImageComponentsIntoPlaceholders(converted, imageComponents));
     if (!htmlHasText || hasPublishableText(merged)) return merged;
   }
   return fallbackHtmlToComponents(html, imageComponents);
 };
 
 module.exports = {
+  emphasizeInfoHeadings,
   fallbackHtmlToComponents,
   htmlToComponents,
   imageComponent,

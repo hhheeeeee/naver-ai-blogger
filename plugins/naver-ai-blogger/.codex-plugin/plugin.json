@@ -1,6 +1,6 @@
 {
   "name": "naver-ai-blogger",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Login to Naver and publish Codex-written restaurant posts to Naver Blog.",
   "author": {
     "name": "Vicky"

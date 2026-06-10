@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const {
+  emphasizeInfoHeadings,
   fallbackHtmlToComponents,
   htmlToComponents,
   isPhotoPlaceholder,
@@ -54,19 +55,51 @@ test('fallback HTML conversion replaces photo placeholders with uploaded images'
 
 test('fallback HTML conversion preserves centered Notion-style section headings', () => {
   const components = fallbackHtmlToComponents([
-    '<h3 style="text-align:center;">📍 위치 정보</h3>',
+    '<h2 style="text-align:center;">📍 위치 정보</h2>',
     '<p style="text-align:center;">서울시 테스트구 테스트로 1.</p>',
     '<p style="text-align:center;">네이버 지도에서 보기.</p>',
-    '<h3 style="text-align:center;">🕒 영업 정보</h3>',
+    '<h2 style="text-align:center;">🕒 영업 정보</h2>',
     '<p style="text-align:center;">매일 11:00부터 21:00까지 운영합니다.</p>',
   ].join('\n'));
 
-  assert.equal(components[0]['@ctype'], 'quotation');
-  assert.equal(firstNodeStyle(components[0]).fontSizeCode, 'fs24');
+  assert.equal(components[0]['@ctype'], 'text');
+  assert.equal(firstNodeStyle(components[0]).fontSizeCode, 'fs28');
   assert.equal(firstNodeStyle(components[0]).bold, true);
   assert.equal(firstParagraphStyle(components[0]).align, 'center');
   assert.equal(firstParagraphStyle(components[1]).align, 'center');
   assert.match(componentText(components[3]), /🕒 영업 정보/);
+});
+
+test('converted components force info headings to large text', async () => {
+  const convertedHeading = textComponent('📍 위치 정보', {
+    align: 'left',
+    bold: true,
+    fontSize: 'fs16',
+  });
+  const convertedBody = textComponent('서울시 테스트구 테스트로 1.');
+
+  const components = await htmlToComponents({
+    convertHtmlToComponents: async () => [
+      convertedHeading,
+      convertedBody,
+    ],
+  }, [
+    '<h2 style="text-align:center;">📍 위치 정보</h2>',
+    '<p style="text-align:center;">서울시 테스트구 테스트로 1.</p>',
+  ].join('\n'));
+
+  assert.equal(firstNodeStyle(components[0]).fontSizeCode, 'fs28');
+  assert.equal(firstNodeStyle(components[0]).bold, true);
+  assert.equal(firstParagraphStyle(components[0]).align, 'center');
+});
+
+test('info heading emphasis also detects plain heading text', () => {
+  const [component] = emphasizeInfoHeadings([
+    textComponent('영업정보', { fontSize: 'fs16' }),
+  ]);
+
+  assert.equal(firstNodeStyle(component).fontSizeCode, 'fs28');
+  assert.equal(firstNodeStyle(component).bold, true);
 });
 
 test('fallback HTML conversion splits packed paragraph into one sentence components', () => {
