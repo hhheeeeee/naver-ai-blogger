@@ -193,6 +193,8 @@ test('draft-prompt creates a Codex-ready prompt from restaurant inputs', () => {
   assert.match(draft, /📍 위치 정보/);
   assert.match(draft, /🕒 영업 정보/);
   assert.match(draft, /한 문장당 한 문단/);
+  assert.match(draft, /AI 티 나는 보고서식 표현/);
+  assert.match(draft, /color:#ff0010/);
   assert.match(draft, /\[외관 사진\]/);
   assert.match(draft, new RegExp(contentPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 });

@@ -98,6 +98,30 @@ test('fallback HTML conversion preserves explicit spacer paragraphs', () => {
   assert.equal(firstParagraphStyle(components[1]).align, 'center');
 });
 
+test('fallback HTML conversion preserves inline font colors', () => {
+  const components = fallbackHtmlToComponents(
+    '<p style="text-align:center;">여기는 <span style="color:#ff0010;">대표 메뉴</span>가 생각보다 괜찮았어요.</p>',
+  );
+
+  assert.equal(components.length, 1);
+  assert.deepEqual(components[0].value[0].nodes.map((node) => node.value), [
+    '여기는',
+    '대표 메뉴',
+    '가 생각보다 괜찮았어요.',
+  ]);
+  assert.equal(components[0].value[0].nodes[1].style.fontColor, '#ff0010');
+  assert.equal(firstParagraphStyle(components[0]).align, 'center');
+});
+
+test('fallback HTML conversion preserves Naver span color classes', () => {
+  const components = fallbackHtmlToComponents(
+    '<p class="se-text-paragraph-align-center"><span class="se-fc-ff0010 se-fs-fs19">마라훠궈 한코우점</span>에 다녀왔어요.</p>',
+  );
+
+  assert.equal(components[0].value[0].nodes[0].style.fontColor, '#ff0010');
+  assert.equal(components[0].value[0].nodes[0].style.fontSizeCode, 'fs19');
+});
+
 test('converted SmartEditor components keep old prepend behavior without placeholders', () => {
   const merged = mergeImageComponentsIntoPlaceholders([
     textComponent('테스트 식당 후기'),

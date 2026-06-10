@@ -2,7 +2,15 @@ const crypto = require('crypto');
 
 const seId = () => `SE-${crypto.randomUUID()}`;
 
-const stripTags = (html) => String(html || '').replace(/<[^>]*>/g, '').trim();
+const decodeHtmlEntities = (text) => String(text || '')
+  .replace(/&nbsp;/g, ' ')
+  .replace(/&amp;/g, '&')
+  .replace(/&lt;/g, '<')
+  .replace(/&gt;/g, '>')
+  .replace(/&quot;/g, '"')
+  .replace(/&#39;/g, "'");
+
+const stripTags = (html) => decodeHtmlEntities(String(html || '').replace(/<[^>]*>/g, '')).trim();
 
 const blockTagPattern = /<(p|h[1-6]|li)\b([^>]*)>([\s\S]*?)<\/\1>/gi;
 
@@ -43,6 +51,52 @@ const parseHtmlBlocks = (html) => {
 };
 
 const blockText = (html) => stripTags(String(html || '').replace(/<br\s*\/?>/gi, '\n'));
+
+const normalizeColor = (color) => {
+  const value = String(color || '').trim();
+  const hex = value.match(/^#?([0-9a-fA-F]{6})$/);
+  return hex ? `#${hex[1].toLowerCase()}` : null;
+};
+
+const styleFromAttrs = (attrs = {}) => {
+  const style = parseStyle(attrs);
+  const classColor = String(attrs).match(/\bse-fc-([0-9a-fA-F]{6})\b/)?.[1];
+  const classSize = String(attrs).match(/\bse-fs-([a-zA-Z0-9]+)\b/)?.[1];
+  return {
+    fontColor: normalizeColor(style.color) || normalizeColor(classColor),
+    fontSize: classSize || null,
+    bold: /\bfont-weight\s*:\s*(bold|[6-9]00)\b/i.test(String(attrs)) ||
+      /\b(se-bold|__se_node_bold)\b/i.test(String(attrs)),
+  };
+};
+
+const parseInlineSegments = (html, defaults = {}) => {
+  const source = String(html || '').replace(/<br\s*\/?>/gi, ' ');
+  const segments = [];
+  const spanPattern = /<span\b([^>]*)>([\s\S]*?)<\/span>/gi;
+  let cursor = 0;
+  let match = null;
+
+  const pushText = (raw, style = {}) => {
+    const text = stripTags(raw).replace(/\s+/g, ' ').trim();
+    if (!text) return;
+    segments.push({
+      text,
+      fontColor: style.fontColor || defaults.fontColor,
+      fontSize: style.fontSize || defaults.fontSize,
+      bold: Boolean(defaults.bold || style.bold),
+    });
+  };
+
+  while ((match = spanPattern.exec(source)) !== null) {
+    pushText(source.slice(cursor, match.index), defaults);
+    pushText(match[2], styleFromAttrs(match[1]));
+    cursor = match.index + match[0].length;
+  }
+
+  pushText(source.slice(cursor), defaults);
+  return segments;
+};
 
 const isSpacerBlock = (html) => {
   const source = String(html || '').trim();
@@ -173,22 +227,22 @@ const mergeImageComponentsIntoPlaceholders = (components, imageComponents = []) 
   return merged;
 };
 
-const textComponent = (text, opts = {}) => ({
+const richTextComponent = (segments, opts = {}) => ({
   id: seId(),
   layout: 'default',
   value: [{
     id: seId(),
-    nodes: [{
+    nodes: segments.map((segment) => ({
       id: seId(),
-      value: text,
+      value: segment.text,
       style: {
-        fontColor: '#333333',
-        fontSizeCode: opts.fontSize || 'fs16',
-        bold: Boolean(opts.bold),
+        fontColor: segment.fontColor || opts.fontColor || '#333333',
+        fontSizeCode: segment.fontSize || opts.fontSize || 'fs16',
+        bold: Boolean(opts.bold || segment.bold),
         '@ctype': 'nodeStyle',
       },
       '@ctype': 'textNode',
-    }],
+    })),
     style: {
       align: opts.align || 'left',
       lineHeight: opts.lineHeight || '1.8',
@@ -198,6 +252,13 @@ const textComponent = (text, opts = {}) => ({
   }],
   '@ctype': opts.ctype || 'text',
 });
+
+const textComponent = (text, opts = {}) => richTextComponent([{
+  text,
+  fontColor: opts.fontColor,
+  fontSize: opts.fontSize,
+  bold: opts.bold,
+}], opts);
 
 const imageComponent = (image, represent = false) => ({
   id: seId(),
@@ -246,12 +307,23 @@ const fallbackHtmlToComponents = (html, imageComponents = []) => {
     }
 
     if (isHeading) {
-      components.push(textComponent(part, {
+      const segments = parseInlineSegments(block.html, {
+        fontSize: block.tag === 'h1' || block.tag === 'h2' ? 'fs28' : 'fs24',
+        bold: true,
+      });
+      components.push(richTextComponent(segments, {
         fontSize: block.tag === 'h1' || block.tag === 'h2' ? 'fs28' : 'fs24',
         bold: true,
         align,
         ctype: block.tag === 'h1' || block.tag === 'h2' ? 'text' : 'quotation',
       }));
+      return;
+    }
+
+    const segments = parseInlineSegments(block.html);
+    const hasInlineStyle = segments.some((segment) => segment.fontColor || segment.fontSize || segment.bold);
+    if (hasInlineStyle) {
+      components.push(richTextComponent(segments, { align }));
       return;
     }
 
@@ -282,5 +354,6 @@ module.exports = {
   imageComponent,
   isPhotoPlaceholder,
   mergeImageComponentsIntoPlaceholders,
+  richTextComponent,
   textComponent,
 };
