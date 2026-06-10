@@ -189,6 +189,10 @@ test('draft-prompt creates a Codex-ready prompt from restaurant inputs', () => {
   assert.match(draft, /Naver Blog Draft Task/);
   assert.match(draft, /테스트 식당/);
   assert.match(draft, /대표 메뉴는 파스타/);
+  assert.match(draft, /네이버 지도 링크/);
+  assert.match(draft, /📍 위치 정보/);
+  assert.match(draft, /🕒 영업 정보/);
+  assert.match(draft, /한 문장당 한 문단/);
   assert.match(draft, /\[외관 사진\]/);
   assert.match(draft, new RegExp(contentPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 });

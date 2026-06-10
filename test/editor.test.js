@@ -14,6 +14,8 @@ const fakeImage = (fileName) => ({
 });
 
 const componentText = (component) => JSON.stringify(component);
+const firstNodeStyle = (component) => component.value[0].nodes[0].style;
+const firstParagraphStyle = (component) => component.value[0].style;
 
 const multiParagraphComponent = (paragraphs) => ({
   ...textComponent('seed'),
@@ -48,6 +50,52 @@ test('fallback HTML conversion replaces photo placeholders with uploaded images'
   assert.equal(components[3]['@ctype'], 'image');
   assert.equal(components[3].fileName, 'main.jpg');
   assert.match(componentText(components[4]), /대표 메뉴는/);
+});
+
+test('fallback HTML conversion preserves centered Notion-style section headings', () => {
+  const components = fallbackHtmlToComponents([
+    '<h3 style="text-align:center;">📍 위치 정보</h3>',
+    '<p style="text-align:center;">서울시 테스트구 테스트로 1.</p>',
+    '<p style="text-align:center;">네이버 지도에서 보기.</p>',
+    '<h3 style="text-align:center;">🕒 영업 정보</h3>',
+    '<p style="text-align:center;">매일 11:00부터 21:00까지 운영합니다.</p>',
+  ].join('\n'));
+
+  assert.equal(components[0]['@ctype'], 'quotation');
+  assert.equal(firstNodeStyle(components[0]).fontSizeCode, 'fs24');
+  assert.equal(firstNodeStyle(components[0]).bold, true);
+  assert.equal(firstParagraphStyle(components[0]).align, 'center');
+  assert.equal(firstParagraphStyle(components[1]).align, 'center');
+  assert.match(componentText(components[3]), /🕒 영업 정보/);
+});
+
+test('fallback HTML conversion splits packed paragraph into one sentence components', () => {
+  const components = fallbackHtmlToComponents(
+    '<p style="text-align:center;">첫 문장입니다. 두 번째 문장입니다. 세 번째 문장입니다.</p>',
+  );
+
+  assert.equal(components.length, 3);
+  assert.match(componentText(components[0]), /첫 문장입니다\./);
+  assert.match(componentText(components[1]), /두 번째 문장입니다\./);
+  assert.match(componentText(components[2]), /세 번째 문장입니다\./);
+  assert.deepEqual(components.map(firstParagraphStyle).map((style) => style.align), [
+    'center',
+    'center',
+    'center',
+  ]);
+});
+
+test('fallback HTML conversion preserves explicit spacer paragraphs', () => {
+  const components = fallbackHtmlToComponents([
+    '<p style="text-align:center;">첫 문장입니다.</p>',
+    '<p><br></p>',
+    '<p style="text-align:center;">다음 문장입니다.</p>',
+  ].join('\n'));
+
+  assert.equal(components.length, 3);
+  assert.equal(componentText(components[1]).includes('"value":" "'), true);
+  assert.equal(firstParagraphStyle(components[1]).lineHeight, '1.0');
+  assert.equal(firstParagraphStyle(components[1]).align, 'center');
 });
 
 test('converted SmartEditor components keep old prepend behavior without placeholders', () => {
@@ -126,9 +174,9 @@ test('HTML conversion falls back when converted components lose publish text', a
 
   assert.deepEqual(components.map((component) => component.fileName || component['@ctype']), [
     'outside.jpg',
-    'quotation',
+    'text',
     'main.jpg',
-    'quotation',
+    'text',
   ]);
   assert.match(componentText(components), /외관은 깔끔/);
   assert.match(componentText(components), /대표 메뉴는/);

@@ -4,6 +4,60 @@ const seId = () => `SE-${crypto.randomUUID()}`;
 
 const stripTags = (html) => String(html || '').replace(/<[^>]*>/g, '').trim();
 
+const blockTagPattern = /<(p|h[1-6]|li)\b([^>]*)>([\s\S]*?)<\/\1>/gi;
+
+const parseStyle = (attrs = '') => {
+  const styleMatch = String(attrs).match(/\sstyle=(["'])(.*?)\1/i);
+  if (!styleMatch) return {};
+  return styleMatch[2]
+    .split(';')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .reduce((style, declaration) => {
+      const [property, ...valueParts] = declaration.split(':');
+      if (!property || valueParts.length === 0) return style;
+      style[property.trim().toLowerCase()] = valueParts.join(':').trim().toLowerCase();
+      return style;
+    }, {});
+};
+
+const parseHtmlBlocks = (html) => {
+  const source = String(html || '');
+  const blocks = [];
+  let match = null;
+
+  while ((match = blockTagPattern.exec(source)) !== null) {
+    blocks.push({
+      tag: match[1].toLowerCase(),
+      attrs: match[2] || '',
+      html: match[3] || '',
+    });
+  }
+
+  if (blocks.length) return blocks;
+  return source.split('\n').map((line) => ({
+    tag: 'p',
+    attrs: '',
+    html: line,
+  }));
+};
+
+const blockText = (html) => stripTags(String(html || '').replace(/<br\s*\/?>/gi, '\n'));
+
+const isSpacerBlock = (html) => {
+  const source = String(html || '').trim();
+  if (!source) return false;
+  return /^(?:<br\s*\/?>|&nbsp;|\s)+$/i.test(source);
+};
+
+const splitSentences = (text) => {
+  const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!normalized) return [];
+  return normalized.match(/[^.!?。！？]+[.!?。！？]+(?:["'”’])?|[^.!?。！？]+$/g)
+    ?.map((sentence) => sentence.trim())
+    .filter(Boolean) || [normalized];
+};
+
 const isPhotoPlaceholder = (text) => {
   const normalized = String(text || '').trim();
   return /^\[(?:추가 사진 필요:\s*)?[^\]]*사진[^\]]*\]$/.test(normalized);
@@ -172,27 +226,41 @@ const imageComponent = (image, represent = false) => ({
 });
 
 const fallbackHtmlToComponents = (html, imageComponents = []) => {
-  const parts = String(html || '')
-    .replace(/<\/(p|h[1-6]|li)>/gi, '\n')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .split('\n')
-    .map(stripTags)
-    .filter(Boolean);
-
   const components = [];
-  parts.forEach((part, index) => {
-    if (isPhotoPlaceholder(part)) {
-      components.push(textComponent(part));
+  parseHtmlBlocks(html).forEach((block, index) => {
+    const part = blockText(block.html);
+    const style = parseStyle(block.attrs);
+    const align = style['text-align'] || 'center';
+    if (!part) {
+      if (isSpacerBlock(block.html)) {
+        components.push(textComponent(' ', { align, lineHeight: '1.0' }));
+      }
       return;
     }
 
-    const heading = index === 0 || part.length < 34;
-    components.push(textComponent(part, heading ? {
-      fontSize: index === 0 ? 'fs28' : 'fs24',
-      bold: true,
-      align: index === 0 ? 'center' : 'left',
-      ctype: index === 0 ? 'text' : 'quotation',
-    } : {}));
+    const isHeading = /^h[1-6]$/.test(block.tag);
+
+    if (isPhotoPlaceholder(part)) {
+      components.push(textComponent(part, { align }));
+      return;
+    }
+
+    if (isHeading) {
+      components.push(textComponent(part, {
+        fontSize: block.tag === 'h1' || block.tag === 'h2' ? 'fs28' : 'fs24',
+        bold: true,
+        align,
+        ctype: block.tag === 'h1' || block.tag === 'h2' ? 'text' : 'quotation',
+      }));
+      return;
+    }
+
+    splitSentences(part).forEach((sentence) => {
+      components.push(textComponent(sentence, {
+        align,
+        ctype: index === 0 && sentence.length < 34 ? 'quotation' : 'text',
+      }));
+    });
   });
   return mergeImageComponentsIntoPlaceholders(components, imageComponents);
 };

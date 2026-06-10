@@ -145,10 +145,13 @@ const buildDraftPrompt = ({
   '## Codex 작업',
   '',
   `1. 위 입력값과 사진 파일명을 참고해 최종 발행용 HTML 본문을 작성한다.`,
-  `2. 사진 위치는 <p>[외관 사진]</p>처럼 독립 문단으로 두고, 업로드 사진 순서와 자연스럽게 맞춘다.`,
-  `3. 최종 HTML만 ${contentFile} 파일에 저장한다.`,
-  `4. 사용자에게 제목 후보 10개, 최종 제목 1개, 추천 태그를 별도로 알려준다.`,
-  `5. 확인 후 아래 publish 명령을 실행할 수 있게 준비한다.`,
+  `2. 발행 전 식당명과 주소로 네이버 지도 링크, 영업시간, 브레이크타임, 라스트오더, 정기휴무, 예약/주차 가능 여부를 검색해 확인 가능한 정보만 본문 첫머리에 채운다.`,
+  `3. 본문 첫머리는 반드시 <h3 style="text-align:center;">📍 위치 정보</h3>, 네이버 지도 링크, <h3 style="text-align:center;">🕒 영업 정보</h3> 순서로 작성한다.`,
+  `4. 모든 일반 문장은 <p style="text-align:center;">문장.</p>처럼 한 문장당 한 문단으로 나누고, 답답하지 않게 <p><br></p>를 중간중간 넣는다.`,
+  `5. 사진 위치는 <p>[외관 사진]</p>처럼 독립 문단으로 두고, 업로드 사진 순서와 자연스럽게 맞춘다.`,
+  `6. 최종 HTML만 ${contentFile} 파일에 저장한다.`,
+  `7. 사용자에게 제목 후보 10개, 최종 제목 1개, 추천 태그를 별도로 알려준다.`,
+  `8. 확인 후 아래 publish 명령을 실행할 수 있게 준비한다.`,
   '',
   '```bash',
   `npx naver-ai-blogger blog \\`,
@@ -162,17 +165,28 @@ const buildDraftPrompt = ({
 
 const buildRestaurantHtml = ({ blogName, restaurantAddress, notes }) => {
   const lines = [
-    `<h2>${blogName}</h2>`,
-    `<p>${restaurantAddress}</p>`,
-    '<p>사진으로 남겨둔 분위기와 방문 정보를 바탕으로 간단히 정리한 후기입니다.</p>',
-    '<h3>분위기</h3>',
-    '<p>공간은 방문 목적에 맞춰 편하게 머무르기 좋은 인상입니다. 자세한 분위기는 함께 올린 사진을 참고하면 좋습니다.</p>',
-    '<h3>음식과 경험</h3>',
-    '<p>메뉴와 식사 흐름은 사진 중심으로 확인할 수 있도록 구성했습니다. 직접 방문 전 위치와 운영 정보를 함께 확인해 보세요.</p>',
-    '<h3>방문 팁</h3>',
-    '<p>방문 전에는 영업시간, 예약 가능 여부, 주차 정보를 한 번 더 확인하는 것을 추천합니다.</p>',
+    '<h3 style="text-align:center;">📍 위치 정보</h3>',
+    `<p style="text-align:center;">${restaurantAddress}</p>`,
+    '<p style="text-align:center;">네이버 지도 링크는 발행 전 확인해 넣어 주세요.</p>',
+    '<p><br></p>',
+    '<h3 style="text-align:center;">🕒 영업 정보</h3>',
+    '<p style="text-align:center;">영업시간, 브레이크타임, 라스트오더, 정기휴무는 방문 전 네이버 지도에서 한 번 더 확인하는 것을 추천합니다.</p>',
+    '<p><br></p>',
+    `<h2 style="text-align:center;">${blogName}</h2>`,
+    '<p style="text-align:center;">사진으로 남겨둔 분위기와 방문 정보를 바탕으로 간단히 정리한 후기입니다.</p>',
+    '<p><br></p>',
+    '<h3 style="text-align:center;">✨ 분위기</h3>',
+    '<p style="text-align:center;">공간은 방문 목적에 맞춰 편하게 머무르기 좋은 인상입니다.</p>',
+    '<p style="text-align:center;">자세한 분위기는 함께 올린 사진을 참고하면 좋습니다.</p>',
+    '<p><br></p>',
+    '<h3 style="text-align:center;">🍽️ 음식과 경험</h3>',
+    '<p style="text-align:center;">메뉴와 식사 흐름은 사진 중심으로 확인할 수 있도록 구성했습니다.</p>',
+    '<p style="text-align:center;">직접 방문 전 위치와 운영 정보를 함께 확인해 보세요.</p>',
+    '<p><br></p>',
+    '<h3 style="text-align:center;">💡 방문 팁</h3>',
+    '<p style="text-align:center;">방문 전에는 영업시간, 예약 가능 여부, 주차 정보를 한 번 더 확인하는 것을 추천합니다.</p>',
   ];
-  if (notes) lines.push(`<p>${notes}</p>`);
+  if (notes) lines.push(`<p style="text-align:center;">${notes}</p>`);
   return lines.join('\n');
 };
 
